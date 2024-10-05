@@ -1,7 +1,6 @@
 {
   "name": "team-fwiends",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -12,5 +11,6 @@
   "dependencies": {
     "dotenv": "^16.4.5",
     "mysql2": "^3.11.3"
-  }
+  },
+  "description": ""
 }
