@@ -1,62 +1,150 @@
-/*Gets rid of the white margins around the entire window/body*/
-body{
-  margin: 0px;
+/* Reset body margins and padding */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  overflow: hidden; /* Prevent scrolling */
+  width: 100vw; /* Ensures full width */
+  height: 100vh; /* Ensures full height */
+  box-sizing: border-box;
 }
 
-.container{
+/* General container styling */
+.container {
   display: flex;
   flex-direction: column;
+  align-items: center;
   justify-content: center;
+  text-align: center;
+  width: 100%; /* Ensure containers stay within viewport */
+  height: 100%;
 }
 
-/*Colors of each flex-box*/
-#header{
+/* Header styling */
+#header {
   background-color: hsl(240, 100%, 8%);
-  height: 6vh;
-}
-#aboutUs{
-  color: hsl(0, 0%, 100%); 
-  background-color: hsl(6, 93%, 71%);
-  width: 10%;
-  height: 50%;
-  border-radius: 20px;
-  border-color: hsl(0, 0%, 95%);
-  margin-left: auto;
-  margin-right: 1%;
+  height: 8vh; 
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 2%;
+  position: relative;
 }
 
-#main-body{
+/* Style the logo */
+#logo {
+  height: 8vh; 
+  width: 10vh;
+  margin-right: auto; 
+  margin-left: 1%; 
+}
+
+#aboutUs {
+  color: white;
+  background-color: hsl(6, 93%, 71%);
+  padding: 15px 60px;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 2%;
+
+  /* Add shadow */
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  
+  /* Smooth transition for hover and click effects */
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+
+/* Hover effect: Slightly darken the button and increase shadow */
+#aboutUs:hover {
+  background-color: hsl(6, 93%, 78%);
+  box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Active/click effect: Change color to a darker pink */
+#aboutUs:active {
+  background-color: hsl(6, 93%, 63%);
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+
+/* Main body styling */
+#main-body {
   background-color: hsl(208, 55%, 78%);
   height: 85vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-#footer{
-  background-color: hsl(7, 41%, 92%);
-  height: 21vh;
-}
-
-#upload{
-  border: 7px solid;
+/* Upload box styling */
+#upload {
+  border: 7px solid hsl(0, 0%, 95%);
   border-radius: 20px;
-  border-color:hsl(0, 0%, 95%);
-  background-color: hsl(0, 0%, 100%);
-  width: 27%;
-  height:45%;
-  margin: auto;
-  margin-top: 9%;
+  background-color: white;
+  width: 550px; 
+  height: 400px; 
   display: flex;
   flex-direction: column;
   justify-content: center;
+  position: relative;
+}
+
+#upload-text {
+  font-size: 1.8em; 
+  font-weight: bold; 
+  position: absolute; 
+  top: 5%; 
+  left: 5%; 
+}
+
+#click {
+  font-size: 10em; /* Keep a large size for "+" */
+  color: hsl(6, 93%, 71%);
+  
+  /*Was experimenting with this, tried to get the + to be skinnier but remain tall*/
+  line-height: 1; 
+  font-weight: 0.1; 
+  transform: scale(2.2, 2.2); 
+}
+
+/* Footer styling */
+#footer {
+  background-color: hsl(7, 41%, 92%); /* Greyish background */
+  height: 10vh; 
+  width: 100%;
+  display: flex;
+  justify-content: flex-start; 
+  align-items: flex-start; 
+  padding-left: 2%; 
+  padding-top: 1.5%; 
+  position: relative;
+}
+
+#footer-content {
+  display: flex;
+  gap: 20px;
+  justify-content: flex-start; /* Align footer links to the left */
   align-items: center;
 }
 
-#upload-text{
-  margin-top: 5%;
-  margin-right: 75%;
+.footer-link {
+  font-weight: bold;
+  text-decoration: underline;
+  color: black;
 }
 
-#click{
-  margin: auto;
-  font-size: 17em;
-  color: hsl(6, 93%, 71%);
+/*Copyright Infrigement*/
+#footer p {
+  font-size: 0.8em;
+  color: black;
+  margin-left: 0;
+  justify-content: flex-start;
+  margin-top: 1.5%; 
 }
