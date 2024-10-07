@@ -33,12 +33,14 @@ body {
 }
 
 /* Style the logo */
+/*
 #logo {
   height: 8vh; 
   width: 10vh;
   margin-right: auto; 
   margin-left: 1%; 
 }
+*/
 
 #aboutUs {
   color: white;
@@ -111,7 +113,9 @@ body {
   /*Was experimenting with this, tried to get the + to be skinnier but remain tall*/
   line-height: 1; 
   font-weight: 0.1; 
-  transform: scale(2.2, 2.2); 
+  transform: scale(2.2, 2.2);
+
+  display:block;
 }
 
 /* Footer styling */
