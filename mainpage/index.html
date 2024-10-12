@@ -18,11 +18,19 @@
 
         <!-- Main Body Section -->
         <div class="container" id="main-body">
+
+            <!--div id "upload" will deal with everything in that upload box-->
             <div id="upload">
                 <div id="upload-text">Upload</div>
-                <div id="click">₊</div>
-                    <input type="file" id="uploadFile" style="display:none">
-            </div>
+               
+                <!--Had to create this weird div "custom-plus" that has its own div ids for
+                the vertical and horizontal lines of the "+" in order to manipulate the size easier-->
+                <div id="custom-plus">
+                    <div id="horizontal-line"></div>
+                    <div id="vertical-line"></div>
+                </div>
+                <input type="file" id="uploadFile" style="display:none">
+            </div>            
         </div>
 
         <!-- Footer Section -->

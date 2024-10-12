@@ -92,35 +92,48 @@ body {
   background-color: white;
   width: 550px; 
   height: 400px; 
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
   position: relative;
-}
-
-#upload-text {
-  font-size: 1.8em; 
-  font-weight: bold; 
-  position: absolute; 
-  top: 5%; 
-  left: 5%; 
-}
-
-#click {
-  color: hsl(6, 93%, 71%);
-  
-  width: 100%;
-  height: 100%;
-  font-size: 10em; /* Keep a large size for "+" */
   display: flex;
   justify-content: center;
   align-items: center;
-  /*Was experimenting with this, tried to get the + to be skinnier but remain tall
-  line-height: 1; 
-  font-weight: 0.1; 
-  transform: scale(2.2, 2.2); 
-  transform: scale(2.2, 2.2);
-  */
+}
+
+/* Upload text styling */
+#upload-text {
+  font-size: 1.8em;
+  font-weight: bold;
+  position: absolute;
+  top: 10%;
+  left: 5%;
+}
+
+/* Custom plus symbol */
+#custom-plus {
+  position: relative;
+  width: 150px; /* Width of the "+" symbol*/
+  height: 150px; /* Height of the "+" symbol*/
+}
+
+/* Horizontal line for the plus */
+#horizontal-line {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%; 
+  height: 7px; /*Controls the thickness*/
+  background-color: hsl(6, 93%, 71%);
+  transform: translateY(-50%);
+}
+
+/* Vertical line for the plus */
+#vertical-line {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 7px; /*Controls the thickness*/
+  height: 100%; 
+  background-color: hsl(6, 93%, 71%);
+  transform: translateX(-50%);
 }
 
 /* Footer styling */
