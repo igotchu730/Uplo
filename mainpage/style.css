@@ -7,6 +7,7 @@ body {
   width: 100vw; /* Ensures full width */
   height: 100vh; /* Ensures full height */
   box-sizing: border-box;
+  background-color: #f3e4e2;
 }
 
 /* General container styling */
@@ -22,37 +23,31 @@ body {
 
 /* Header styling */
 #header {
-  background-color: hsl(240, 100%, 8%);
-  height: 8vh; 
+  background-color: #00002A;
+  height: 75px;
   width: 100%;
   display: flex;
+  flex-direction: row;
   align-items: center;
   justify-content: flex-end;
-  padding-right: 2%;
-  position: relative;
+  position: fixed; /* keeps the header's size and position consistent */
+  top: 0; /* reposition header to the top */
+  z-index: 1000; /* keeps the header on top */
 }
 
-/* Style the logo */
-/*
-#logo {
-  height: 8vh; 
-  width: 10vh;
-  margin-right: auto; 
-  margin-left: 1%; 
+#notHeader{
+  overflow-y: auto; /* scrolling overflow */
+  overflow-x: hidden;
 }
-*/
 
 #aboutUs {
   color: white;
-  background-color: hsl(6, 93%, 71%);
+  background-color: #FA8072;
   padding: 15px 60px;
   border-radius: 20px;
+  margin: 20px;
   border: none;
   cursor: pointer;
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  right: 2%;
 
   /* Add shadow */
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
@@ -70,15 +65,15 @@ body {
 
 /* Active/click effect: Change color to a darker pink */
 #aboutUs:active {
-  background-color: hsl(6, 93%, 63%);
+  background-color: #FA8072;
   box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 
 /* Main body styling */
 #main-body {
-  background-color: hsl(208, 55%, 78%);
-  height: 85vh;
+  background-color: #aacae6;
+  height: 100vh;
   width: 100%;
   display: flex;
   align-items: center;
@@ -87,23 +82,33 @@ body {
 
 /* Upload box styling */
 #upload {
-  border: 7px solid hsl(0, 0%, 95%);
+  border: 7px solid #f2f2f2;
   border-radius: 20px;
-  background-color: white;
-  width: 550px; 
+  background-color: #f2f2f2;
+  width: 400px; 
   height: 400px; 
   position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
+  cursor: pointer;
+  box-shadow: 0px 50px 50px hsla(0, 0%, 0%, 0.300);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  /*display: none;*/
+}
+
+/* when user hovers over upload box, animate ther box */
+#upload:hover{
+  transform: scale(1.05);
+  box-shadow: 0px 70px 70px hsla(0, 0%, 0%, 0.20);
 }
 
 /* Upload text styling */
 #upload-text {
-  font-size: 1.8em;
+  font-size: 1.5em;
   font-weight: bold;
   position: absolute;
-  top: 10%;
+  top: 5%;
   left: 5%;
 }
 
@@ -121,7 +126,7 @@ body {
   left: 0;
   width: 100%; 
   height: 7px; /*Controls the thickness*/
-  background-color: hsl(6, 93%, 71%);
+  background-color: #FA8072;
   transform: translateY(-50%);
 }
 
@@ -132,28 +137,42 @@ body {
   left: 50%;
   width: 7px; /*Controls the thickness*/
   height: 100%; 
-  background-color: hsl(6, 93%, 71%);
+  background-color: #FA8072;
   transform: translateX(-50%);
 }
 
 /* Footer styling */
 #footer {
-  background-color: hsl(7, 41%, 92%); /* Greyish background */
-  height: 10vh; 
+  background-color: #f3e4e2; /* Greyish background */
   width: 100%;
+  height: auto;
   display: flex;
-  justify-content: flex-start; 
+  flex-direction: column;
+  justify-content: flex-end; 
   align-items: flex-start; 
-  padding-left: 2%; 
-  padding-top: 1.5%; 
   position: relative;
+  z-index: 1000; /* bring to front */
 }
 
 #footer-content {
-  display: flex;
+  background-color: #f3e4e2;
+  width: 100%;
   gap: 20px;
+  padding-left: 20px;
+  padding-top: 20px;
+  display: flex;
   justify-content: flex-start; /* Align footer links to the left */
   align-items: center;
+}
+
+#copyright{
+  background-color:#f3e4e2;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; 
+  align-items: flex-start;
+  padding-bottom: 10px;
 }
 
 .footer-link {
@@ -166,7 +185,5 @@ body {
 #footer p {
   font-size: 0.8em;
   color: black;
-  margin-left: 0;
-  justify-content: flex-start;
-  margin-top: 1.5%; 
+  padding-left: 20px;
 }

@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Front Page</title>
+    <title>Main Page</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style2.css">
 </head>
 <body>
 
@@ -16,31 +17,47 @@
             <button onclick="doSomething()" id="aboutUs">About Us</button>
         </div>
 
-        <!-- Main Body Section -->
-        <div class="container" id="main-body">
+        <div class="container" id="notHeader">
+            <!-- Main Body Section -->
+            <div class="container" id="main-body">
 
-            <!--div id "upload" will deal with everything in that upload box-->
-            <div id="upload">
-                <div id="upload-text">Upload</div>
-               
-                <!--Had to create this weird div "custom-plus" that has its own div ids for
-                the vertical and horizontal lines of the "+" in order to manipulate the size easier-->
-                <div id="custom-plus">
-                    <div id="horizontal-line"></div>
-                    <div id="vertical-line"></div>
-                </div>
-                <input type="file" id="uploadFile" style="display:none">
-            </div>            
-        </div>
+                <form action="/upload" method="POST" enctype="multipart/form-data">
+                    <!--div id "upload" will deal with everything in that upload box-->
+                    <div id="upload">
+                        <div id="upload-text">Upload</div>
+                    
+                        <!--Had to create this weird div "custom-plus" that has its own div ids for
+                        the vertical and horizontal lines of the "+" in order to manipulate the size easier-->
+                        <div id="custom-plus">
+                            <div id="horizontal-line"></div>
+                            <div id="vertical-line"></div>
+                        </div>
+                        <input type="file" id="uploadFile" style="display:none" multiple>
+                    </div>
 
-        <!-- Footer Section -->
-        <div class="container" id="footer">
-            <div id="footer-content">
-                <a href="#" class="footer-link">Terms of Service</a> 
-                <a href="#" class="footer-link">Privacy Policy</a> 
-                <a href="#" class="footer-link">Contact</a>
+                    <!--div id "staging" will deal with everything after user uploads file(s)-->
+                    <div id="staging">
+                        <div id="filePreview">
+
+                        </div>
+                        <div id="fileInfoDisplay">
+
+                        </div>
+                        <input id="submitButton" type="submit" value="Upload">
+                    </div>
+                </form>
+
             </div>
-            <p>© 2024 Team Fwiends</p>
+
+            <!-- Footer Section -->
+            <div class="container" id="footer">
+                <div id="footer-content">
+                    <a href="#" class="footer-link">Terms of Service</a> 
+                    <a href="#" class="footer-link">Privacy Policy</a> 
+                    <a href="#" class="footer-link">Contact</a>
+                </div>
+                <div id="copyright"><p>© 2024 Team Fwiends</p></div>
+            </div>
         </div>
 
     </div>
