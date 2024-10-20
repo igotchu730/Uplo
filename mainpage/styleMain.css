@@ -1,0 +1,198 @@
+/* Reset body margins and padding */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  overflow-y: hidden; /* hide overflows */
+  overflow-x: hidden;
+  width: 100%; /* Ensures full width */
+  height: 850px; /* custom full height, controls scrolling area */
+  box-sizing: border-box;
+  background-color: #f3e4e2;
+}
+
+/* General container styling */
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  width: 100%; /* Ensure containers stay within viewport */
+  height: 100%;
+  
+  overflow-y: auto; /* overflow for container, auto scrolling */
+  overflow-x: hidden;
+}
+
+/* Header styling */
+#header {
+  background-color: #00002A;
+  height: 75px;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  z-index: 1000; /* keeps the header on top */
+
+  position:fixed;
+  top:0;
+  left:0;
+}
+
+
+
+#aboutUs {
+  color: white;
+  background-color: #FA8072;
+  padding: 15px 60px;
+  border-radius: 20px;
+  margin: 20px;
+  border: none;
+  cursor: pointer;
+
+  /* Add shadow */
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  
+  /* Smooth transition for hover and click effects */
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+
+/* Hover effect: Slightly darken the button and increase shadow */
+#aboutUs:hover {
+  background-color: hsl(6, 93%, 78%);
+  box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Active/click effect: Change color to a darker pink */
+#aboutUs:active {
+  background-color: #FA8072;
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+
+/* Main body styling */
+#main-body {
+  background-color: #aacae6;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /*overflow-y: auto; /* overflow for main body, auto scrolling 
+  overflow-x: hidden;*/
+  padding-top: 500px;
+  padding-bottom:500px;
+}
+
+/* Upload box styling */
+#upload {
+  border: 7px solid #f2f2f2;
+  border-radius: 20px;
+  background-color: #f2f2f2;
+  width: 400px; 
+  height: 400px; 
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0px 50px 50px hsla(0, 0%, 0%, 0.300);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* when user hovers over upload box, animate the box */
+#upload:hover{
+  transform: scale(1.05);
+  box-shadow: 0px 70px 70px hsla(0, 0%, 0%, 0.20);
+}
+
+/* Upload text styling */
+#upload-text {
+  font-size: 1.5em;
+  font-weight: bold;
+  position: absolute;
+  top: 5%;
+  left: 5%;
+}
+
+/* Custom plus symbol */
+#custom-plus {
+  position: relative;
+  width: 150px; /* Width of the "+" symbol*/
+  height: 150px; /* Height of the "+" symbol*/
+}
+
+/* Horizontal line for the plus */
+#horizontal-line {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%; 
+  height: 7px; /*Controls the thickness*/
+  background-color: #FA8072;
+  transform: translateY(-50%);
+}
+
+/* Vertical line for the plus */
+#vertical-line {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 7px; /*Controls the thickness*/
+  height: 100%; 
+  background-color: #FA8072;
+  transform: translateX(-50%);
+}
+
+/* Footer styling */
+#footer {
+  background-color: #f3e4e2; /* Greyish background */
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end; 
+  align-items: flex-start; 
+  position: relative;
+  z-index: 1000; /* bring to front */
+
+  position: fixed;
+  bottom: 0;
+  left:0;
+}
+
+#footer-content {
+  background-color: #f3e4e2;
+  width: 100%;
+  gap: 20px;
+  padding-left: 20px;
+  padding-top: 20px;
+  display: flex;
+  justify-content: flex-start; /* Align footer links to the left */
+  align-items: center;
+}
+
+#copyright{
+  background-color:#f3e4e2;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; 
+  align-items: flex-start;
+  padding-bottom: 10px;
+}
+
+.footer-link {
+  font-weight: bold;
+  text-decoration: underline;
+  color: black;
+}
+
+/*Copyright Infrigement*/
+#footer p {
+  font-size: 0.8em;
+  color: black;
+  padding-left: 20px;
+}

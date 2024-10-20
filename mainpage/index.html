@@ -4,60 +4,67 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Main Page</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="style2.css">
+    <link rel="stylesheet" href="styleMain.css">
+    <link rel="stylesheet" href="styleUpload.css">
 </head>
 <body>
 
     <div class="container">
 
         <!-- Header Section -->
-        <div class="container" id="header">
+        <div id="header">
             <!--<img src="logo.jpg" id="logo" alt="Logo"> -->
             <button onclick="doSomething()" id="aboutUs">About Us</button>
         </div>
 
-        <div class="container" id="notHeader">
-            <!-- Main Body Section -->
-            <div class="container" id="main-body">
+        <!-- Main Body Section -->
+        <div id="main-body">
 
-                <form action="/upload" method="POST" enctype="multipart/form-data">
-                    <!--div id "upload" will deal with everything in that upload box-->
-                    <div id="upload">
-                        <div id="upload-text">Upload</div>
-                    
-                        <!--Had to create this weird div "custom-plus" that has its own div ids for
-                        the vertical and horizontal lines of the "+" in order to manipulate the size easier-->
-                        <div id="custom-plus">
-                            <div id="horizontal-line"></div>
-                            <div id="vertical-line"></div>
-                        </div>
-                        <input type="file" id="uploadFile" style="display:none" multiple>
+            <form action="/upload" method="POST" enctype="multipart/form-data">
+                <!--div id "upload" will deal with everything in that upload box-->
+                <div id="upload">
+                    <div id="upload-text">Upload</div>
+                
+                    <!--Had to create this weird div "custom-plus" that has its own div ids for
+                    the vertical and horizontal lines of the "+" in order to manipulate the size easier-->
+                    <div id="custom-plus">
+                        <div id="horizontal-line"></div>
+                        <div id="vertical-line"></div>
                     </div>
-
-                    <!--div id "staging" will deal with everything after user uploads file(s)-->
-                    <div id="staging">
-                        <div id="filePreview">
-
-                        </div>
-                        <div id="fileInfoDisplay">
-
-                        </div>
-                        <input id="submitButton" type="submit" value="Upload">
-                    </div>
-                </form>
-
-            </div>
-
-            <!-- Footer Section -->
-            <div class="container" id="footer">
-                <div id="footer-content">
-                    <a href="#" class="footer-link">Terms of Service</a> 
-                    <a href="#" class="footer-link">Privacy Policy</a> 
-                    <a href="#" class="footer-link">Contact</a>
+                    <input type="file" id="uploadFile" style="display:none" multiple>
                 </div>
-                <div id="copyright"><p>© 2024 Team Fwiends</p></div>
+
+                <!--div id "staging" will deal with everything after user uploads file(s)-->
+                <div id="staging">
+                    <div id="filePreview">
+
+                    </div>
+                    <div id="fileInfoDisplay">
+                        <div id="fileInfoButtonsContainer">
+                            <div id="addMoreButton">
+                                <img src="/assets/addIcon.png" class="function-img">
+                                Add Files
+                            </div>
+                            <div id="resetButton">
+                                <img src="/assets/resetIcon.png" class="function-img">
+                                Start Over
+                            </div>
+                        </div>
+                    </div>
+                    <input id="submitButton" type="submit" value="Upload">
+                </div>
+            </form>
+        
+        </div>
+
+        <!-- Footer Section -->
+        <div id="footer">
+            <div id="footer-content">
+                <a href="#" class="footer-link">Terms of Service</a> 
+                <a href="#" class="footer-link">Privacy Policy</a> 
+                <a href="#" class="footer-link">Contact</a>
             </div>
+            <div id="copyright"><p>© 2024 Team Fwiends</p></div>
         </div>
 
     </div>

@@ -1,0 +1,152 @@
+/* staging container styling */
+#staging {
+    border-bottom-right-radius: 20px;
+    border-bottom-left-radius: 20px;
+    border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
+    background-color: #f2f2f2;
+    width: 550px; 
+    height: 500px; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 5px 10px 5px;
+    box-shadow: 0px 50px 50px hsla(0, 0%, 0%, 0.300);
+}
+
+/* file preview styling */
+#filePreview{
+    border: 1px solid #fa807269;
+    width: 530px; 
+    height: 270px;
+    overflow-y: auto;
+}
+
+/* file preview item styling */
+.file-item{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid #FA8072;
+    background-color: #f2f2f2;
+    margin-bottom: 5px;
+}
+
+/* styling for the div for the file name and size */
+.file-data-container{
+    display: flex;
+    justify-content:space-between;
+    align-items: center;
+    width: 100%;
+    margin: 0px 5px 0px 7px;
+}
+
+/* file preview item delete button styling */
+.delete-button{
+    background-color: #FA8072;
+    border: none;
+    cursor: pointer;
+}
+
+/* delete button img styling */
+.delete-button-img{
+    width: 20px;
+    height: 20px;
+}
+
+/* Hover effect for delete button */
+.delete-button:hover {
+    background-color: hsl(6, 93%, 78%);
+}
+
+/* file info box styling */
+#fileInfoDisplay{
+    width: 530px;
+    height: 135px;
+    margin: 10px;
+    display: flex;
+    border: 1px solid hsla(0, 0%, 0%, 0.13);
+}
+
+/* add files button styling */
+#addMoreButton{
+    color: #FA8072;
+    border: 1px solid #FA8072;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 75px;
+    height: 25px;
+    font-size: 12px;
+    padding-right: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 5px;
+
+    /* Smooth transition for hover and click effects */
+    transition: background-color 0.3s ease;
+}
+
+/* icon for functional buttons */
+.function-img{
+    width: 20px;
+    height: 20px;
+}
+
+/* Hover effect for add files button */
+#addMoreButton:hover {
+    background-color: hsl(5, 68%, 90%);
+}
+
+/* reset button styling */
+#resetButton{
+    color: #FA8072;
+    border: 1px solid #FA8072;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 75px;
+    height: 25px;
+    font-size: 12px;
+    padding-right: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    /* Smooth transition for hover and click effects */
+    transition: background-color 0.3s ease;
+}
+
+/* Hover effect for add files button */
+#resetButton:hover {
+    background-color: hsl(5, 68%, 90%);
+}
+
+/* styling for file info buttons */
+#fileInfoButtonsContainer{
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+/* upload button styling */
+#submitButton{
+    color: white;
+    background-color: #FA8072;
+    border: none;
+    cursor: pointer;
+    border-radius: 15px;
+    width: 50%;
+    height: 50px;
+    font-size: 15px;
+
+    /* Smooth transition for hover and click effects */
+    transition: background-color 0.3s ease;
+}
+
+/* Hover effect for upload button */
+#submitButton:hover {
+    background-color: hsl(6, 93%, 78%);
+}
+  

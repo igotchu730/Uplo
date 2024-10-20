@@ -1,4 +1,5 @@
 require('dotenv').config();
+const AWS = require('aws-sdk');
 const mysql = require('mysql2');
 
 // Create the connection pool
