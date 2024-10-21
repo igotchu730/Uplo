@@ -149,4 +149,9 @@
 #submitButton:hover {
     background-color: hsl(6, 93%, 78%);
 }
-  
+
+/* Active/click effect: Change color to a darker pink */
+#submitButton:active {
+    background-color: #FA8072;
+    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.2);
+}
