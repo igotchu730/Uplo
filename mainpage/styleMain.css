@@ -180,8 +180,11 @@ body {
   font-weight: bold;
   text-decoration: underline;
   color: black;
+  transition: color 0.3s ease;
 }
-
+.footer-link:hover {
+    color: #FA8072;  
+}
 /*Copyright Infrigement*/
 #footer p {
   font-size: 0.8em;
