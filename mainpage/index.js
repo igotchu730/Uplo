@@ -4,6 +4,8 @@ const stagingBox = document.getElementById('staging'); // The staging box after 
 const addMoreButton = document.getElementById('addMoreButton'); // button to add moore files
 const resetButton = document.getElementById('resetButton'); // button to reset file upload
 
+
+
 //FOR TESTING: REMOVE LATER
 const logFiles = () => {
     console.clear();
@@ -44,6 +46,8 @@ fileInput.addEventListener('change',(event) => {
 /* -- file preview display -- */
 
 let fileList = []; //create manual array to track user files
+let totalUploadSize; //global variable for size of upload, dynamic size
+let totalUploadSizeGB; //global variable for size of upload ing GB
 
 fileInput.addEventListener('change',function(){ //listen for changes in file input
     
@@ -62,7 +66,7 @@ fileInput.addEventListener('change',function(){ //listen for changes in file inp
     });
 
     // for each file input...
-    fileList.forEach((file,index) => {
+    fileList.forEach((file, index) => {
 
         // Create a div for the file
         const fileItem = document.createElement('div');
@@ -100,8 +104,20 @@ fileInput.addEventListener('change',function(){ //listen for changes in file inp
 
         // Append fileItem div to the file preview display area
         filePreview.appendChild(fileItem);
+
     })
-    logFiles(); //FOR TESTING: REMOVE LATER
+    
+    // update the upload sizes and display it
+    totalUploadSize = totalFileSize(fileList)
+    totalUploadSizeGB = totalFileSizeInGB(fileList)
+    const uploadSize = document.getElementById('fileSize');
+    uploadSize.textContent = `${totalFileSize(fileList)} / 2 GB`;
+
+    //FOR TESTING: REMOVE LATER
+    logFiles();
+    console.log(totalUploadSize);
+    console.log(totalUploadSizeGB + ' GB');
+    //FOR TESTING: REMOVE LATER
 })
 
 // function to remove a file from the manual file list at a given index
@@ -127,9 +143,35 @@ function updateFileInput(){
 
 // function to format the file size to readable sizes
 function formatFileSize(bytes){
-    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-    if(bytes === 0) return '0 Bytes';
+    const sizes = ['B', 'KB', 'MB', 'GB', 'TB']; // array of file sizes
+    if(bytes === 0) return '0 B'; // if size is 0, return 0
     const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)),10);
+    // get ln of bytes divided by ln of 1024. This will determine the position in the array and therefore the size type.
     return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
 }
 
+// finds sum of all file sizes given an array of files, returns total size dynamically
+function totalFileSize(files){
+    let totalSize = 0;
+    files.forEach(files => {
+        totalSize += files.size;
+    });
+    totalSize = formatFileSize(totalSize);
+    return totalSize;
+};
+
+// function to format the file size to GB
+function formatFileSizeInGB(bytes) {
+    const sizeInGB = bytes / Math.pow(1024, 3); // Convert bytes to GB
+    return sizeInGB.toFixed(9); // Format to 9 decimal places
+}
+
+// finds sum of all file sizes given an array of files, returns total size in GB
+function totalFileSizeInGB(files){
+    let totalSize = 0;
+    files.forEach(files => {
+        totalSize += files.size;
+    });
+    totalSize = formatFileSizeInGB(totalSize);
+    return totalSize;
+};

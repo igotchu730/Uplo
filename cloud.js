@@ -1,3 +1,9 @@
+// import objects and functions from other files
+const {
+    randomKey
+} = require('./utility');
+
+// import env
 require('dotenv').config();
 
 // Require AWS library
@@ -12,6 +18,8 @@ AWS.config.update({
 });
 
 
+
+
 // Create s3 object
 const s3 = new AWS.S3();
 
@@ -20,7 +28,7 @@ const s3 = new AWS.S3();
 const generatePresignedURL = async(fileName, fileType) => {
     const params = {
         Bucket: process.env.S3_BUCKET_NAME, //s3 bucket name
-        Key: fileName, // name of file
+        Key: fileName +'-'+ randomKey(), // name of file
         Expires: 60, // expiration time of URL after generation
         ContentType: fileType //file type
     }
