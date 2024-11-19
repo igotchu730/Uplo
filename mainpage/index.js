@@ -153,8 +153,8 @@ function formatFileSize(bytes){
 // finds sum of all file sizes given an array of files, returns total size dynamically
 function totalFileSize(files){
     let totalSize = 0;
-    files.forEach(files => {
-        totalSize += files.size;
+    files.forEach(file => {
+        totalSize += file.size;
     });
     totalSize = formatFileSize(totalSize);
     return totalSize;
@@ -169,8 +169,8 @@ function formatFileSizeInGB(bytes) {
 // finds sum of all file sizes given an array of files, returns total size in GB
 function totalFileSizeInGB(files){
     let totalSize = 0;
-    files.forEach(files => {
-        totalSize += files.size;
+    files.forEach(file => {
+        totalSize += file.size;
     });
     totalSize = formatFileSizeInGB(totalSize);
     return totalSize;
