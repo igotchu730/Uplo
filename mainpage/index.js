@@ -85,7 +85,7 @@ fileInput.addEventListener('change',function(){ //listen for changes in file inp
         fileDataContainer.appendChild(fileDataName);
         fileDataContainer.appendChild(fileDataSize);
 
-        // Creat the delete button and add the image icon
+        // Create the delete button and add the image icon
         const deleteButton = document.createElement('button')
         deleteButton.className = 'delete-button';
         const img = document.createElement('img');
@@ -117,6 +117,7 @@ fileInput.addEventListener('change',function(){ //listen for changes in file inp
     logFiles();
     console.log(totalUploadSize);
     console.log(totalUploadSizeGB + ' GB');
+    console.log(fileList);
     //FOR TESTING: REMOVE LATER
 })
 

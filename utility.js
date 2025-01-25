@@ -1,4 +1,7 @@
 const crypto = require('crypto');
+const fs = require('fs'); //file system module
+const archiver = require('archiver'); //archiver module
+const {PassThrough} = require('stream'); //import passthrough
 
 // Function to create a randomized key for secure presigned urls
 const randomKey = () => {
@@ -7,7 +10,33 @@ const randomKey = () => {
 }
 
 
+// Function to zip/compress files from an array of files
+const zipper = async (files) => {
+    const passThrough = new PassThrough(); // use passthrough stream to pass data without manipulating it
+    const archive = archiver('zip', { zlib: { level: 9 } }); // format zip and compression settings
+  
+    // error handling
+    archive.on('error', (err) => {
+      console.error('Archive Error: ', err.message);
+      throw err;
+    });
+  
+    archive.pipe(passThrough); //archive output is piped into passthrough stream
+  
+    // loop through array
+    for (const file of files) {
+      archive.append(file.buffer, { name: file.originalname }); // Append each file buffer to the archive
+    }
+  
+    archive.finalize(); //signals the archiver that we are finished adding files and it can finish the zip
+  
+    //passThrough.pipe(fs.createWriteStream('output.zip'));
+    return passThrough;
+};
+
+
 // export objects and functions
 module.exports = {
-    randomKey
+    randomKey,
+    zipper
 };

@@ -26,39 +26,74 @@ const s3 = new AWS.S3();
 
 // function to generate a presigned URL using AWS SDK
 const generatePresignedURL = async(fileName, fileType) => {
+    const extension = fileName.substring(fileName.lastIndexOf('.')); // Extract file extension
+    const baseName = fileName.substring(0,fileName.lastIndexOf('.')); // Extract file name
+    const uniqueFileName = `${baseName}-${randomKey()}${extension}`; // Generate unique file name
+
     const params = {
         Bucket: process.env.S3_BUCKET_NAME, //s3 bucket name
-        Key: fileName +'-'+ randomKey(), // name of file
-        Expires: 60, // expiration time of URL after generation
+        Key: uniqueFileName, // name of file
+        Expires: 300, // expiration time of URL after generation
         ContentType: fileType //file type
     }
     try {
-        return await s3.getSignedUrlPromise('putObject', params); // function from aws sdk to generate url
+        const url = await s3.getSignedUrlPromise('putObject', params);
+        //console.log("Generated presigned URL:", url);
+        return url;
     } catch (error) { // error handling
         console.error("AWS error generating presigned URL:", error);
         throw error;
     }
 };
 
-// Function that handles uploading file from client side. Makes a get request to presigned url endpoint.
-async function uploadFile(file){
-    const baseUrl = process.env.BASE_URL || 'http://localhost:3000'; // Fallback for development
-    const response = await fetch(`${baseUrl}/generate-presigned-url?fileName=${file.name}&fileType=${file.type}`); //make get request to endpoint with query params, save the response
-    const { url } = await response.json(); // retrieve presigned url from the response
 
-    await fetch(url, { // send put request to presigned url to upload to s3
+
+// Upload functions
+
+const fs = require('fs'); // for file system interactions
+const fetch = require('node-fetch'); // for making http requests in nodejs
+
+// Upload function.
+// Takes in a readable stream for the file being uploaded, the file name, and file type
+const uploadFile = async (readStream, fileName, fileType) => {
+    const baseUrl = process.env.BASE_URL || 'http://localhost:3000'; // Fallback for development
+
+    // Request presigned URL from the server
+    const response = await fetch(`${baseUrl}/generate-presigned-url?fileName=${fileName}&fileType=${fileType}`);
+    if (!response.ok) {
+        throw new Error(`Failed to get presigned URL: ${response.statusText}`);
+    }
+    // extract presigned url from server response
+    const { url } = await response.json();
+
+    console.log(`Uploading ${fileName} with type ${fileType}...`);
+
+    // use fs to obtain file size from the readStream's path property
+    // S3 requires the exact content length.
+    const fileStats = fs.statSync(readStream.path);
+    const fileSize = fileStats.size;
+
+    // Use the presigned URL to upload the file
+    const uploadResponse = await fetch(url, {
         method: 'PUT',
-        headers:{
-            'Content-Type': file.type, // indicate MIME type
-            'Content-Length': file.size
+        headers: {
+            'Content-Type': fileType || 'application/octet-stream', // Ensure MIME type is correct, defaults to generic type
+            'Content-Length': fileSize,
         },
-        body: file.stream, //the file to be uploaded
+        body: readStream, // Pass the readable stream directly as the body
         duplex: 'half', // Required for streaming body in Node.js fetch
     });
 
-    console.log('File uploaded successfully');
-};
+    // error handling
+    if (!uploadResponse.ok) {
+        const errorText = await uploadResponse.text();
+        console.error('Upload failed:', uploadResponse.status, errorText);
+        throw new Error(`Failed to upload file: ${uploadResponse.statusText}`);
+    }
 
+    // success
+    console.log(`${fileName} uploaded successfully with type ${fileType}`);
+};
 
 
 
