@@ -1,4 +1,5 @@
 const express = require('express');
+const router = express.Router();
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
@@ -8,7 +9,8 @@ const port = 3000;
 const {
   generatePresignedURL,
   uploadFile,
-  uploadFile2
+  s3,
+  uploadFileMultiPart
 } = require('./cloud');
 const {
   zipper,
@@ -18,7 +20,12 @@ const {
 // Serve static files from the "mainpage" directory and "assets" folder
 app.use(express.static(path.join(__dirname, 'mainpage')));
 app.use('/assets',express.static(path.join(__dirname,'assets')));
+
+// Middleware
 app.use(express.json());
+
+// mount router to app
+app.use(router);
 
 // Serve index.html on the root route
 app.get('/', (req, res) => {
@@ -56,9 +63,9 @@ const storage = multer.diskStorage({
         cb(null, uploadDir); //callback
     },
     // function to specify how uploaded files should be named
-    filename: (req,file,cb) => {
+    /*filename: (req,file,cb) => {
         cb(null, randomKey() + '-' + file.originalname);
-    },
+    },*/
 });
 
 // Initalize multer with custom storage
@@ -78,7 +85,7 @@ app.post('/upload', upload.single('file'), async (req,res) => {
 
     // create file path to uploads folder for temp storage and define metadata values
     const filePath = path.join(__dirname, 'uploads', uploadedFile.filename);
-    const fileName = uploadedFile.originalname;
+    const fileName = `${uploadedFile.originalname}-${randomKey()}`;
     const fileType = uploadedFile.mimetype;
 
     try{
@@ -86,19 +93,108 @@ app.post('/upload', upload.single('file'), async (req,res) => {
       const readStream = fs.createReadStream(filePath);
 
       // upload file to s3
-      await uploadFile(readStream, fileName, fileType);
+      await uploadFileMultiPart(readStream, fileName, fileType);
 
       // delete the file temporarily stored in disk
       fs.unlink(filePath, (err) =>{
           if(err) console.error('Error deleting file:', err);
-          else console.log('File deleted after upload.');
+          else console.log('File deleted from disk after upload.');
       });
       // success
       res.send('File uploaded and processed successfully.');
 
   } catch(error){ //error handling
-      console.error('Error uploading file: ', error);
-      res.status(500).send('Error processing file.');
+        console.error('Error uploading file: ', error);
+        res.status(500).send('Error processing file.');
   }
 });
 
+
+// route to initiate multipart upload
+router.post('/initiate-multipart-upload', async (req,res) =>{
+
+    // retrieve request body
+    const{ fileName, fileType, fileSize } = req.body;
+    console.log(`Received request to initiate multipart upload for file: ${fileName}`);
+
+    if (!fileName || !fileType || !fileSize) {
+        console.error('Missing fileName, fileType, or fileSize in request body.');
+        return res.status(400).json({ error: 'Missing fileName, fileType, or fileSize' });
+    }
+
+    try{
+        // populate parameters for s3
+        const params = {
+            Bucket: process.env.S3_BUCKET_NAME,
+            Key: fileName,
+            ContentType: fileType,
+        };
+
+        // initiate multipart upload
+        const {UploadId} = await s3.createMultipartUpload(params).promise();
+
+        // Find amount of parts
+        const partCount = Math.ceil(req.body.fileSize / (5*1024*1024));
+        console.log('Part count:', partCount);
+
+        // Array to contain presigned url for each part upload
+        const presignedUrls = [];
+
+        // loop through all parts of the upload and generate presigned urls
+        for (let partNumber = 1; partNumber <= partCount; partNumber++) {
+    try {
+        const url = await s3.getSignedUrlPromise('uploadPart', {
+            Bucket: process.env.S3_BUCKET_NAME,
+            Key: fileName,
+            UploadId,
+            PartNumber: partNumber,
+        });
+        presignedUrls.push(url);
+        console.log(`Generated presigned URL for part ${partNumber}`);
+    } catch (err) {
+        console.error(`Error generating presigned URL for part ${partNumber}:`, err);
+        console.error('AWS Error Response:', err.message);
+    }
+}
+
+        // response
+        res.json({uploadId: UploadId, parts: presignedUrls});
+
+    }catch(error){ //error handling
+        console.error('Error initiating multipart upload:', error);
+        res.status(500).json({ error: 'Failed to initiate multipart upload' });
+    };
+})
+
+// route to complete multipart upload
+router.post('/complete-multipart-upload', async (req,res) => {
+
+    // retrieve request body
+    const { uploadId, fileName, parts } = req.body;
+
+    if(!uploadId || !fileName || !parts || !Array.isArray(parts)){
+        return res.status(400).json({ error: 'Invalid request payload' });
+    }
+
+    try{
+        const params = {
+            Bucket: process.env.S3_BUCKET_NAME,
+            Key: fileName,
+            UploadId: uploadId,
+            MultipartUpload: {
+                Parts: parts.map(({ PartNumber, ETag }) => ({
+                    PartNumber,
+                    ETag,
+                })),
+            },
+        };
+
+        const result = await s3.completeMultipartUpload(params).promise();
+        res.json({ message: 'Upload complete', location: result.location });
+
+    }catch(error){
+        console.error('Error completing multipart upload:', error);
+        res.status(500).json({ error: 'Failed to complete multipart upload' });
+    }
+
+})

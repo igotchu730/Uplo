@@ -65,8 +65,10 @@ const uploadFile = async (readStream, fileName, fileType) => {
     }
     // extract presigned url from server response
     const { url } = await response.json();
+    console.log('Generated presigned URL')
 
-    console.log(`Uploading ${fileName} with type ${fileType}...`);
+
+    console.log(`Uploading ${fileName}...`);
 
     // use fs to obtain file size from the readStream's path property
     // S3 requires the exact content length.
@@ -92,9 +94,89 @@ const uploadFile = async (readStream, fileName, fileType) => {
     }
 
     // success
-    console.log(`${fileName} uploaded successfully with type ${fileType}`);
+    console.log(`${fileName} uploaded successfully`);
 };
 
+
+// Multipart upload function.
+// Takes in a readable stream for the file being uploaded, the file name, and file type
+const uploadFileMultiPart = async (readStream, fileName, fileType) => {
+    const baseUrl = process.env.BASE_URL || 'http://localhost:3000'; // Fallback for development
+
+    // retrieve file size of uploaded file
+    const fileStats = fs.statSync(readStream.path);
+    const fileSize = fileStats.size;
+
+    // Request presigned URL
+    const response = await fetch(`${baseUrl}/initiate-multipart-upload`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            fileName,
+            fileType,
+            fileSize
+        }),
+    });
+    if (!response.ok) {
+        throw new Error(`Failed to get presigned URL: ${response.statusText}`);
+    }
+
+    // Retrieve response
+    const {uploadId, parts} = await response.json();
+      
+
+    console.log(`Initiated multipart upload for ${fileName}.`);
+
+    const etags = []; // Initializer array top store etags (part numbers)
+    const chunkSize = 5 * 1024 * 1024; // Size for each part is 5 mb
+    let partNumber = 1; //initilize number of parts
+    // create read stream to the file at the given path.
+    // Highwatermark controls the amount of data read at a time.
+    const stream = fs.createReadStream(readStream.path, {highWaterMark:chunkSize});
+
+    // Upload the file stream by chunks
+    for await (const chunk of stream){
+    
+        console.log(`Uploading part ${partNumber}`);
+        const uploadResponse = await fetch(parts[partNumber - 1], {
+            method: 'PUT',
+            headers: {
+                'Content-Length': chunk.length,
+            },
+            body: chunk,
+        });
+        
+        if (!uploadResponse.ok) {
+            const errorText = await uploadResponse.text();
+            console.error(`Failed to upload part ${partNumber}:`, errorText);
+            throw new Error(`Failed to upload part ${partNumber}: ${errorText}`);
+        };
+
+        // Update etag array
+        const eTag = uploadResponse.headers.get('Etag');
+        etags.push({PartNumber: partNumber, ETag: eTag});
+
+
+        console.log(`Part ${partNumber} uploaded successfully.`);
+        partNumber++; // iterate
+    };
+
+    // Complete the multipart upload
+    const completeResponse = await fetch(`${baseUrl}/complete-multipart-upload`,{
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            uploadId,
+            fileName,
+            parts: etags,
+        }),
+    });
+    if (!completeResponse.ok) {
+        throw new Error(`Failed to complete multipart upload: ${completeResponse.statusText}`);
+    };
+
+    console.log(`${fileName} uploaded successfully using multipart upload.`);
+}
 
 
 
@@ -102,5 +184,6 @@ const uploadFile = async (readStream, fileName, fileType) => {
 module.exports = {
     s3, 
     generatePresignedURL,
-    uploadFile
+    uploadFile,
+    uploadFileMultiPart
 };
