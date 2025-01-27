@@ -62,59 +62,55 @@ const storage = multer.diskStorage({
         }
         cb(null, uploadDir); //callback
     },
-    // function to specify how uploaded files should be named
-    /*filename: (req,file,cb) => {
-        cb(null, randomKey() + '-' + file.originalname);
-    },*/
 });
 
 // Initalize multer with custom storage
 const upload = multer({storage});
 
 // http post endppint, expects a single file.
-app.post('/upload', upload.single('file'), async (req,res) => {
+app.post('/upload', upload.array('files'), async (req,res) => {
 
     // retrieve uploaded file's metadata
-    const uploadedFile = req.file;
+    const uploadedFiles = req.files;
 
     // check if the file uploaded or not, send error if not.
-    // req.file contains metadata of the uploaded file. 1)filename, 2)path
-    if(!uploadedFile){
+    if(!uploadedFiles || uploadedFiles.length === 0){
         return res.status(400).send('No file uploaded');
     }
 
-    // create file path to uploads folder for temp storage and define metadata values
-    const filePath = path.join(__dirname, 'uploads', uploadedFile.filename);
-    const fileName = `${uploadedFile.originalname}-${randomKey()}`;
-    const fileType = uploadedFile.mimetype;
-
     try{
-      // creates a readable stream for the uploaded file using its saved location.
-      const readStream = fs.createReadStream(filePath);
+        for(const file of uploadedFiles){  
+            // create file path to uploads folder for temp storage and define metadata values
+            const filePath = path.join(__dirname, 'uploads', file.filename);
+            const fileName = `${file.originalname}`; //-${randomKey()}`
+            const fileType = file.mimetype;
 
-      // upload file to s3
-      await uploadFileMultiPart(readStream, fileName, fileType);
+            // creates a readable stream for the uploaded file using its saved location.
+            const readStream = fs.createReadStream(filePath);
 
-      // delete the file temporarily stored in disk
-      fs.unlink(filePath, (err) =>{
-          if(err) console.error('Error deleting file:', err);
-          else console.log('File deleted from disk after upload.');
-      });
-      // success
-      res.send('File uploaded and processed successfully.');
+            // upload file to s3
+            await uploadFileMultiPart(readStream, fileName, fileType);
 
+            // delete the file temporarily stored in disk
+            fs.unlink(filePath, (err) =>{
+                if(err) console.error(`Error deleting file ${fileName} from disk.`, err);
+                else console.log(`File ${fileName} deleted from disk after upload.`);
+            });
+        }
+        // success
+        res.send('File uploaded and processed successfully.');
   } catch(error){ //error handling
         console.error('Error uploading file: ', error);
         res.status(500).send('Error processing file.');
   }
 });
 
-
 // route to initiate multipart upload
 router.post('/initiate-multipart-upload', async (req,res) =>{
 
     // retrieve request body
     const{ fileName, fileType, fileSize } = req.body;
+
     console.log(`Received request to initiate multipart upload for file: ${fileName}`);
 
     if (!fileName || !fileType || !fileSize) {

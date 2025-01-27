@@ -107,6 +107,12 @@ const uploadFileMultiPart = async (readStream, fileName, fileType) => {
     const fileStats = fs.statSync(readStream.path);
     const fileSize = fileStats.size;
 
+    // rename file name to standardized file name for clean storage
+    const extension = fileName.substring(fileName.lastIndexOf('.')); // Extract file extension
+    const baseName = fileName.substring(0,fileName.lastIndexOf('.')); // Extract file name
+    const uniqueFileName = `${baseName}-${randomKey()}${extension}`; // Generate unique file name
+    fileName = uniqueFileName;
+
     // Request presigned URL
     const response = await fetch(`${baseUrl}/initiate-multipart-upload`, {
         method: 'POST',
