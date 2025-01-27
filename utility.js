@@ -12,6 +12,7 @@ const randomKey = () => {
 
 // Function to zip/compress files from an array of files
 const zipper = async (files) => {
+    console.log('Zipping file.')
     const passThrough = new PassThrough(); // use passthrough stream to pass data without manipulating it
     const archive = archiver('zip', { zlib: { level: 9 } }); // format zip and compression settings
   
@@ -25,11 +26,15 @@ const zipper = async (files) => {
   
     // loop through array
     for (const file of files) {
-      archive.append(file.buffer, { name: file.originalname }); // Append each file buffer to the archive
+      //archive.append(file.buffer, { name: file.originalname }); // Append each file buffer to the archive
+      const fileStream = fs.createReadStream(file.path); // Create stream from file path
+      archive.append(fileStream, {name: file.originalname});
     }
   
     archive.finalize(); //signals the archiver that we are finished adding files and it can finish the zip
   
+    console.log('File successfully zipped.')
+
     //passThrough.pipe(fs.createWriteStream('output.zip'));
     return passThrough;
 };

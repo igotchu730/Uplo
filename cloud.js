@@ -52,6 +52,7 @@ const generatePresignedURL = async(fileName, fileType) => {
 
 const fs = require('fs'); // for file system interactions
 const fetch = require('node-fetch'); // for making http requests in nodejs
+const setPartSize = 64;
 
 // Upload function.
 // Takes in a readable stream for the file being uploaded, the file name, and file type
@@ -103,6 +104,9 @@ const uploadFile = async (readStream, fileName, fileType) => {
 const uploadFileMultiPart = async (readStream, fileName, fileType) => {
     const baseUrl = process.env.BASE_URL || 'http://localhost:3000'; // Fallback for development
 
+    // preserve original file name just in case
+    const origName = fileName;
+
     // retrieve file size of uploaded file
     const fileStats = fs.statSync(readStream.path);
     const fileSize = fileStats.size;
@@ -134,7 +138,7 @@ const uploadFileMultiPart = async (readStream, fileName, fileType) => {
     console.log(`Initiated multipart upload for ${fileName}.`);
 
     const etags = []; // Initializer array top store etags (part numbers)
-    const chunkSize = 5 * 1024 * 1024; // Size for each part is 5 mb
+    const chunkSize = setPartSize * 1024 * 1024; // Size for each part is 64 mb
     let partNumber = 1; //initilize number of parts
     // create read stream to the file at the given path.
     // Highwatermark controls the amount of data read at a time.
@@ -181,7 +185,7 @@ const uploadFileMultiPart = async (readStream, fileName, fileType) => {
         throw new Error(`Failed to complete multipart upload: ${completeResponse.statusText}`);
     };
 
-    console.log(`${fileName} uploaded successfully using multipart upload.`);
+    console.log(`${origName} uploaded successfully using multipart upload.`);
 }
 
 
@@ -191,5 +195,6 @@ module.exports = {
     s3, 
     generatePresignedURL,
     uploadFile,
-    uploadFileMultiPart
+    uploadFileMultiPart,
+    setPartSize
 };

@@ -10,7 +10,8 @@ const {
   generatePresignedURL,
   uploadFile,
   s3,
-  uploadFileMultiPart
+  uploadFileMultiPart,
+  setPartSize
 } = require('./cloud');
 const {
   zipper,
@@ -67,42 +68,99 @@ const storage = multer.diskStorage({
 // Initalize multer with custom storage
 const upload = multer({storage});
 
-// http post endppint, expects a single file.
+// http post endppint
 app.post('/upload', upload.array('files'), async (req,res) => {
 
     // retrieve uploaded file's metadata
     const uploadedFiles = req.files;
+    const multiThreshold = 100 *1024 * 1024;
 
     // check if the file uploaded or not, send error if not.
     if(!uploadedFiles || uploadedFiles.length === 0){
         return res.status(400).send('No file uploaded');
     }
+    if(uploadedFiles.length === 1){
+        try{
+            for(const file of uploadedFiles){
+                // create file path to uploads folder for temp storage and define metadata values
+                const filePath = path.join(__dirname, 'uploads', file.filename);
+                const fileName = `${file.originalname}`;
+                const fileType = file.mimetype;
+                if(file.size < multiThreshold){
+                    // creates a readable stream for the uploaded file using its saved location.
+                    const readStream = fs.createReadStream(filePath);
+                    // upload file to s3
+                    await uploadFile(readStream, fileName, fileType);
+                }
+                else if(file.size >= multiThreshold){
+                    // creates a readable stream for the uploaded file using its saved location.
+                    const readStream = fs.createReadStream(filePath);
+                    // upload file to s3
+                    await uploadFileMultiPart(readStream, fileName, fileType);
+                }
+                // delete the file temporarily stored in disk
+                fs.unlink(filePath, (err) =>{
+                    if(err) console.error(`Error deleting file ${fileName} from disk.`, err);
+                    else console.log(`${fileName} deleted from disk after upload.`);
+                });
+            }
+            // success
+            res.send('File uploaded and processed successfully.');
+      } catch(error){ //error handling
+            console.error('Error uploading file: ', error);
+            res.status(500).send('Error processing file.');
+      }
+    }
+    if(uploadedFiles.length > 1){
+        try{
 
-    try{
-        for(const file of uploadedFiles){  
-            // create file path to uploads folder for temp storage and define metadata values
-            const filePath = path.join(__dirname, 'uploads', file.filename);
-            const fileName = `${file.originalname}`; //-${randomKey()}`
-            const fileType = file.mimetype;
+            const zippedFileStream = await zipper(uploadedFiles);
 
-            // creates a readable stream for the uploaded file using its saved location.
-            const readStream = fs.createReadStream(filePath);
+            const zippedFileName = `zipped-files-${randomKey()}.zip`;
+            const zippedFilePath = path.join(__dirname, 'uploads', zippedFileName);
 
-            // upload file to s3
-            await uploadFileMultiPart(readStream, fileName, fileType);
+            const writeStream = fs.createWriteStream(zippedFilePath);
+            zippedFileStream.pipe(writeStream);
 
-            // delete the file temporarily stored in disk
-            fs.unlink(filePath, (err) =>{
-                if(err) console.error(`Error deleting file ${fileName} from disk.`, err);
-                else console.log(`File ${fileName} deleted from disk after upload.`);
+            await new Promise((resolve, reject) => {
+                writeStream.on('finish', resolve);
+                writeStream.on('error', reject);
             });
-        }
-        // success
-        res.send('File uploaded and processed successfully.');
-  } catch(error){ //error handling
-        console.error('Error uploading file: ', error);
-        res.status(500).send('Error processing file.');
-  }
+
+            const zippedFileStats = fs.statSync(zippedFilePath);
+            const zippedFileSize = zippedFileStats.size;
+
+            const readStream = fs.createReadStream(zippedFilePath);
+
+            if(zippedFileSize < multiThreshold){
+                await uploadFile(readStream, zippedFileName, 'application/zip');
+            }
+            else if(zippedFileSize >= multiThreshold){
+                await uploadFileMultiPart(readStream, zippedFileName, 'application/zip');
+            };
+
+            // delete the zipped file temporarily stored in disk
+            fs.unlink(zippedFilePath, (err) =>{
+                if(err) console.error(`Error deleting file ${zippedFileName} from disk.`, err);
+                else console.log(`${zippedFileName} deleted from disk after upload.`);
+            });
+            // delete individual unzipped files
+            for (const file of uploadedFiles) {
+                fs.unlink(file.path, (err) => {
+                    if (err) console.error(`Error deleting file ${file.originalname} from disk.`, err);
+                    else console.log(`${file.originalname} deleted from disk.`);
+                });
+            }
+
+            // success
+            res.send('File uploaded and processed successfully.');
+
+      } catch(error){ //error handling
+            console.error('Error uploading file: ', error);
+            res.status(500).send('Error processing file.');
+      }
+    }
+
 });
 
 // route to initiate multipart upload
@@ -130,7 +188,7 @@ router.post('/initiate-multipart-upload', async (req,res) =>{
         const {UploadId} = await s3.createMultipartUpload(params).promise();
 
         // Find amount of parts
-        const partCount = Math.ceil(req.body.fileSize / (5*1024*1024));
+        const partCount = Math.ceil(req.body.fileSize / (setPartSize*1024*1024));
         console.log('Part count:', partCount);
 
         // Array to contain presigned url for each part upload
