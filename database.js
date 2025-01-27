@@ -40,3 +40,8 @@ function testQuery() {
 }
 
 testQuery();
+
+module.exports = pool;
+
+testConnection();
+
