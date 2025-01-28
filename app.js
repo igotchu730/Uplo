@@ -71,6 +71,10 @@ const upload = multer({storage});
 // http post endppint
 app.post('/upload', upload.array('files'), async (req,res) => {
 
+    // retrieve user inputed title for uploade
+    let title = req.body.uploadTitle;
+    console.log('Uploaded Title:', title);
+
     // retrieve uploaded file's metadata
     const uploadedFiles = req.files;
     const multiThreshold = 100 *1024 * 1024;
@@ -79,29 +83,44 @@ app.post('/upload', upload.array('files'), async (req,res) => {
     if(!uploadedFiles || uploadedFiles.length === 0){
         return res.status(400).send('No file uploaded');
     }
+
+    // if a single file is uploaded...
     if(uploadedFiles.length === 1){
         try{
+            // iterate through array of uploaded files
             for(const file of uploadedFiles){
                 // create file path to uploads folder for temp storage and define metadata values
                 const filePath = path.join(__dirname, 'uploads', file.filename);
                 const fileName = `${file.originalname}`;
                 const fileType = file.mimetype;
-                if(file.size < multiThreshold){
-                    // creates a readable stream for the uploaded file using its saved location.
-                    const readStream = fs.createReadStream(filePath);
-                    // upload file to s3
-                    await uploadFile(readStream, fileName, fileType);
+
+                // if user title is empty, use original file name
+                if(!title || title.trim() === ''){
+                    title = file.originalname;
                 }
-                else if(file.size >= multiThreshold){
-                    // creates a readable stream for the uploaded file using its saved location.
+                else{ // otherwise
+                    // take user inputed title and reformat with proper extension
+                    const fileExt = path.extname(fileName); //extract file extension from mime type
+                    title = `${title}${fileExt}` // combine to make new title, ext includes '.'
+                }
+
+                // if file size is less than the set size limit
+                if(file.size < multiThreshold){
+                    // create a readable stream for the uploaded file using its saved location.
                     const readStream = fs.createReadStream(filePath);
-                    // upload file to s3
-                    await uploadFileMultiPart(readStream, fileName, fileType);
+                    // upload file to s3 using normal upload
+                    await uploadFile(readStream, title, fileType);
+                } // if file size is over set size limit
+                else if(file.size >= multiThreshold){
+                    // create a readable stream for the uploaded file using its saved location.
+                    const readStream = fs.createReadStream(filePath);
+                    // upload file to s3 using multipart upload
+                    await uploadFileMultiPart(readStream, title, fileType);
                 }
                 // delete the file temporarily stored in disk
                 fs.unlink(filePath, (err) =>{
-                    if(err) console.error(`Error deleting file ${fileName} from disk.`, err);
-                    else console.log(`${fileName} deleted from disk after upload.`);
+                    if(err) console.error(`Error deleting file ${title} from disk.`, err);
+                    else console.log(`${title} deleted from disk after upload.`);
                 });
             }
             // success
@@ -111,30 +130,39 @@ app.post('/upload', upload.array('files'), async (req,res) => {
             res.status(500).send('Error processing file.');
       }
     }
+    // if multiple files are uploaded
     if(uploadedFiles.length > 1){
         try{
-
+            // zip the array of files
             const zippedFileStream = await zipper(uploadedFiles);
 
-            const zippedFileName = `zipped-files-${randomKey()}.zip`;
+            // if user title is empty, use a default name
+            if (!title || title.trim() === '') {
+                title = 'zipped-files';
+            }
+            // else rename file to user title
+            const zippedFileName = `${title}-${randomKey()}.zip`;//`zipped-files-${randomKey()}.zip`;
             const zippedFilePath = path.join(__dirname, 'uploads', zippedFileName);
 
+            // create write stream to specified file path
             const writeStream = fs.createWriteStream(zippedFilePath);
-            zippedFileStream.pipe(writeStream);
-
-            await new Promise((resolve, reject) => {
-                writeStream.on('finish', resolve);
-                writeStream.on('error', reject);
+            zippedFileStream.pipe(writeStream); // write the zip stream to the file path
+            await new Promise((resolve, reject) => { // this process is asynchronus
+                writeStream.on('finish', resolve); // success
+                writeStream.on('error', reject); // error handling
             });
 
+            // retrieve file size of zip
             const zippedFileStats = fs.statSync(zippedFilePath);
             const zippedFileSize = zippedFileStats.size;
 
+            // create read stream to zip file
             const readStream = fs.createReadStream(zippedFilePath);
 
+            // if file size is less than set size limit, upload file to s3 using normal upload
             if(zippedFileSize < multiThreshold){
                 await uploadFile(readStream, zippedFileName, 'application/zip');
-            }
+            } // if file size is over set size limit, upload file to s3 using multipart upload
             else if(zippedFileSize >= multiThreshold){
                 await uploadFileMultiPart(readStream, zippedFileName, 'application/zip');
             };
@@ -155,12 +183,11 @@ app.post('/upload', upload.array('files'), async (req,res) => {
             // success
             res.send('File uploaded and processed successfully.');
 
-      } catch(error){ //error handling
+        } catch(error){ //error handling
             console.error('Error uploading file: ', error);
             res.status(500).send('Error processing file.');
-      }
+        }
     }
-
 });
 
 // route to initiate multipart upload

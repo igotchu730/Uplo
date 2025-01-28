@@ -32,10 +32,8 @@ const zipper = async (files) => {
     }
   
     archive.finalize(); //signals the archiver that we are finished adding files and it can finish the zip
-  
     console.log('File successfully zipped.')
-
-    //passThrough.pipe(fs.createWriteStream('output.zip'));
+    
     return passThrough;
 };
 
