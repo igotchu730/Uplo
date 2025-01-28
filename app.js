@@ -5,7 +5,9 @@ const fs = require('fs');
 const multer = require('multer');
 const fetch = require('node-fetch');
 const app = express();
-const port = 3000;
+// import env
+require('dotenv').config();
+const PORT = process.env.PORT;
 const {
   generatePresignedURL,
   uploadFile,
@@ -33,8 +35,8 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'mainpage', 'index.html'));
 });
 
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
 });
 
 
