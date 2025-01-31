@@ -35,9 +35,13 @@ async function insertFileUpload(ipAddress, fileName, s3Link) {
       const hashedFileName = await hashSensitiveData(fileName);
       const hashedS3Link = await hashSensitiveData(s3Link);
 
+      // Time fields 
+      const currentTime = new Date();
+      const expirationTime = new Date(currentTime.getTime() + 24 * 60 * 60 * 1000);
+
       // Insert the hashed data into the file_uploads table
-      const query = 'INSERT INTO file_uploads (ip_address, file_name, s3_link, created_at) VALUES (?, ?, ?, NOW())';
-      const values = [hashedIpAddress, hashedFileName, hashedS3Link];
+      const query = 'INSERT INTO file_uploads (ip_address, file_name, s3_link, expiration_date, created_at) VALUES (?, ?, ?, ?, ?)';
+      const values = [hashedIpAddress, hashedFileName, hashedS3Link, expirationTime, currentTime];
 
       pool.query(query, values, (err, results) => {
           if (err) {
