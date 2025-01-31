@@ -3,7 +3,9 @@ const fs = require('fs'); //file system module
 const archiver = require('archiver'); //archiver module
 const {PassThrough} = require('stream'); //import passthrough
 
-const pool = require('./database');
+const {
+    pool
+} = require('./database');
 const mysql = require('mysql2');
 const bcrypt = require('bcrypt'); // bcrypt included
 
@@ -13,7 +15,7 @@ const bcrypt = require('bcrypt'); // bcrypt included
 //Code for bcrypt
 const saltRounds = 10;
 
-// Function to hash the IP address before storing it
+// Function to hash sensitve data before storing it
 async function hashSensitiveData(data) {
   try {
       const saltRounds = 10;
@@ -52,7 +54,7 @@ async function insertFileUpload(ipAddress, fileName, s3Link) {
               console.error('Error inserting data:', err);
               return;
           }
-          console.log('File upload data inserted successfully:', results);
+          //console.log('File upload data inserted successfully:', results);
       });
   } catch (error) {
       console.error('Error in insertFileUpload:', error);

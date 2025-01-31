@@ -1,6 +1,7 @@
 require('dotenv').config();
 const AWS = require('aws-sdk');
 const mysql = require('mysql2');
+const bcrypt = require('bcrypt'); // bcrypt included
 
 // Create the connection pool
 const pool = mysql.createPool({
@@ -11,6 +12,7 @@ const pool = mysql.createPool({
     port: process.env.MYSQLPORT
 });
 
+// Function to test connection to MySQL database
 function testConnection() {
     console.log('Attempting to connect to the database...');
 
@@ -27,8 +29,6 @@ function testConnection() {
     console.log('Connection attempt completed.');
 }
 
-testConnection();
-
 function testQuery() {
     pool.query('SELECT * FROM file_uploads', (err, results) => {
         if (err) {
@@ -39,9 +39,11 @@ function testQuery() {
     });
 }
 
-testQuery();
+//Test functions, remove later
+//testQuery();
+//testConnection();
 
-module.exports = pool;
-
-testConnection();
+module.exports = {
+    pool,
+};
 

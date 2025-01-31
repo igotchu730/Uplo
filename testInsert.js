@@ -1,3 +1,4 @@
+require('aws-sdk/lib/maintenance_mode_message').suppress = true; //temp code to block maintenance message
 const {insertFileUpload} = require('./utility.js');
 
 (async () => {
@@ -8,7 +9,7 @@ const {insertFileUpload} = require('./utility.js');
     try {
         console.log('Attempting to insert...');
         const result = await insertFileUpload(ipAddress, fileName, s3Link);
-        console.log('Insert successful:', result);
+        console.log('Insert successful.');
     } catch (err) {
         console.error('Error inserting file upload:', err);
     }
