@@ -53,6 +53,7 @@ const generatePresignedURL = async(fileName, fileType) => {
 const fs = require('fs'); // for file system interactions
 const fetch = require('node-fetch'); // for making http requests in nodejs
 const setPartSize = 64;
+const maxUploadSize = 2 * 1024 * 1024 * 1024; // 2GB limit
 
 // Upload function.
 // Takes in a readable stream for the file being uploaded, the file name, and file type
@@ -196,5 +197,6 @@ module.exports = {
     generatePresignedURL,
     uploadFile,
     uploadFileMultiPart,
-    setPartSize
+    setPartSize,
+    maxUploadSize
 };

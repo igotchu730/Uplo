@@ -13,7 +13,8 @@ const {
   uploadFile,
   s3,
   uploadFileMultiPart,
-  setPartSize
+  setPartSize,
+  maxUploadSize
 } = require('./cloud');
 const {
   zipper,
@@ -75,7 +76,7 @@ app.post('/upload', upload.array('files'), async (req,res) => {
 
     // retrieve user inputed title for uploade
     let title = req.body.uploadTitle;
-    console.log('Uploaded Title:', title);
+    //console.log('Uploaded Title:', title);
 
     // retrieve uploaded file's metadata
     const uploadedFiles = req.files;
@@ -84,17 +85,28 @@ app.post('/upload', upload.array('files'), async (req,res) => {
     // check if the file uploaded or not, send error if not.
     if(!uploadedFiles || uploadedFiles.length === 0){
         return res.status(400).send('No file uploaded');
-    }
+    };
 
     // if a single file is uploaded...
     if(uploadedFiles.length === 1){
         try{
             // iterate through array of uploaded files
             for(const file of uploadedFiles){
+                
                 // create file path to uploads folder for temp storage and define metadata values
                 const filePath = path.join(__dirname, 'uploads', file.filename);
                 const fileName = `${file.originalname}`;
                 const fileType = file.mimetype;
+
+                // reject if file size is above limit
+                if (file.size > maxUploadSize) {
+                    // delete the file temporarily stored in disk
+                    fs.unlink(filePath, (err) =>{
+                        if(err) console.error(`Error deleting file ${file.originalname} from disk.`, err);
+                        else console.log(`${file.originalname} deleted from disk after upload.`);
+                    });
+                    return res.status(400).send(`Error: File ${file.originalname} exceeds 2GB limit.`);
+                }
 
                 // if user title is empty, use original file name
                 if(!title || title.trim() === ''){
@@ -158,6 +170,27 @@ app.post('/upload', upload.array('files'), async (req,res) => {
             const zippedFileStats = fs.statSync(zippedFilePath);
             const zippedFileSize = zippedFileStats.size;
 
+             // reject if zip exceeds 2 GB
+            if (zippedFileSize > maxUploadSize) {
+                console.error(`Error: Zipped file ${zippedFileName} exceeds 2GB limit.`);
+                
+                // delete the zipped file temporarily stored in disk
+                fs.unlink(zippedFilePath, (err) => {
+                    if (err) console.error(`Error deleting large file ${zippedFileName} from disk.`, err);
+                    else console.log(`${zippedFileName} deleted from disk due to size limit.`);
+                });
+
+                // delete individual unzipped files
+                for (const file of uploadedFiles) {
+                    fs.unlink(file.path, (err) => {
+                        if (err) console.error(`Error deleting file ${file.originalname} from disk.`, err);
+                        else console.log(`${file.originalname} deleted from disk.`);
+                    });
+                }
+
+                return res.status(400).send(`Error: Zipped file ${zippedFileName} exceeds 2GB limit.`);
+            }
+
             // create read stream to zip file
             const readStream = fs.createReadStream(zippedFilePath);
 
@@ -180,7 +213,7 @@ app.post('/upload', upload.array('files'), async (req,res) => {
                     if (err) console.error(`Error deleting file ${file.originalname} from disk.`, err);
                     else console.log(`${file.originalname} deleted from disk.`);
                 });
-            }
+            };
 
             // success
             res.send('File uploaded and processed successfully.');
@@ -203,6 +236,12 @@ router.post('/initiate-multipart-upload', async (req,res) =>{
     if (!fileName || !fileType || !fileSize) {
         console.error('Missing fileName, fileType, or fileSize in request body.');
         return res.status(400).json({ error: 'Missing fileName, fileType, or fileSize' });
+    }
+
+    // reject if file size is above limit
+    if (fileSize > maxUploadSize) {
+        console.error(`Error: File ${fileName} exceeds 2GB limit.`);
+        return res.status(400).json({ error: `File ${fileName} exceeds 2GB limit.` });
     }
 
     try{

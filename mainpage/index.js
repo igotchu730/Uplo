@@ -49,6 +49,9 @@ let fileList = []; //create manual array to track user files
 let totalUploadSize; //global variable for size of upload, dynamic size
 let totalUploadSizeGB; //global variable for size of upload ing GB
 
+let fileListPrev = []; // copy array. Like a checkpoint for when the file upload size was last under 2 GB.    
+let isRestoring = false; // flag
+
 fileInput.addEventListener('change',function(){ //listen for changes in file input
     
     const filePreview = document.getElementById('filePreview');
@@ -64,6 +67,33 @@ fileInput.addEventListener('change',function(){ //listen for changes in file inp
             fileInput.files = dataTransfer.files;
         }
     });
+    
+    // Check upload size limit
+    // if file upload size is less than 2 GB
+    if(totalFileSizeInBytes(fileList) < (2 * (1024 ** 3))){
+        // Copy file list to a another array
+        fileListPrev = [...fileList];
+        // Log
+        console.log('Upload size is within 2.00 GB limit.')
+    } else{ // if file upload size is greater than 2 GB
+
+        // Log and alert user
+        console.log('Upload size is over 2.00 GB limit.');
+        alert('Upload size is over 2.00 GB limit.');
+
+        isRestoring = true; // Set flag to prevent infinite loop
+
+        // set filelist to the last time it was under 2 GB
+        fileList = [...fileListPrev];
+        updateFileInput(); // update the file input (UI)
+        
+        // test logs
+        console.log('fileListPrev',fileListPrev);
+        console.log('fileList',fileList);
+
+        isRestoring = false; // Reset flag
+        
+    };
 
     // for each file input...
     fileList.forEach((file, index) => {
@@ -114,10 +144,10 @@ fileInput.addEventListener('change',function(){ //listen for changes in file inp
     uploadSize.textContent = `${totalFileSize(fileList)} / 2 GB`;
 
     //FOR TESTING: REMOVE LATER
-    logFiles();
+    //logFiles();
     console.log(totalUploadSize);
     console.log(totalUploadSizeGB + ' GB');
-    console.log(fileList);
+    console.log(`Bytes: ${totalFileSizeInBytes(fileList)}`);
     //FOR TESTING: REMOVE LATER
 })
 
@@ -129,6 +159,9 @@ function removeFile(index){
 
 // function to update the file list
 function updateFileInput(){
+
+    if (isRestoring) return; // Prevent infinite loop during restoration
+
     // create a new dataTransfer object to allow manipulation of file input list
     const dataTransfer = new DataTransfer();
 
@@ -158,6 +191,15 @@ function totalFileSize(files){
         totalSize += file.size;
     });
     totalSize = formatFileSize(totalSize);
+    return totalSize;
+};
+
+// finds sum of all file sizes given an array of files, returns total size in bytes
+function totalFileSizeInBytes(files){
+    let totalSize = 0;
+    files.forEach(file => {
+        totalSize += file.size;
+    });
     return totalSize;
 };
 

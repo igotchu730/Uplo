@@ -197,6 +197,7 @@
 /* Hover effect for upload button */
 #submitButton:hover {
     background-color: hsl(6, 93%, 78%);
+
 }
 
 /* Active/click effect: Change color to a darker pink */
