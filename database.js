@@ -30,7 +30,7 @@ function testConnection() {
 testConnection();
 
 function testQuery() {
-    pool.query('SELECT * FROM test', (err, results) => {
+    pool.query('SELECT * FROM file_uploads', (err, results) => {
         if (err) {
             console.error('Error executing query:', err);
             return;
@@ -40,3 +40,8 @@ function testQuery() {
 }
 
 testQuery();
+
+module.exports = pool;
+
+testConnection();
+
