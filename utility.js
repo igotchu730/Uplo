@@ -29,7 +29,8 @@ async function hashSensitiveData(data) {
 
 // Insert file upload data into the database
 async function insertFileUpload(ipAddress, fileName, s3Link) {
-  try {
+  try {  
+
       // Hash the sensitive fields
       const hashedIpAddress = await hashSensitiveData(ipAddress);
       const hashedFileName = await hashSensitiveData(fileName);
@@ -38,10 +39,13 @@ async function insertFileUpload(ipAddress, fileName, s3Link) {
       // Time fields 
       const currentTime = new Date();
       const expirationTime = new Date(currentTime.getTime() + 24 * 60 * 60 * 1000);
+      
+      // Randomized ID field
+      const id = randomKey();
 
       // Insert the hashed data into the file_uploads table
-      const query = 'INSERT INTO file_uploads (ip_address, file_name, s3_link, expiration_date, created_at) VALUES (?, ?, ?, ?, ?)';
-      const values = [hashedIpAddress, hashedFileName, hashedS3Link, expirationTime, currentTime];
+      const query = 'INSERT INTO file_uploads (id, ip_address, file_name, s3_link, expiration_date, created_at) VALUES (?, ?, ?, ?, ?, ?)';
+      const values = [id, hashedIpAddress, hashedFileName, hashedS3Link, expirationTime, currentTime];
 
       pool.query(query, values, (err, results) => {
           if (err) {
