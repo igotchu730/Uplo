@@ -1,3 +1,4 @@
+require('aws-sdk/lib/maintenance_mode_message').suppress = true; //temp code to block maintenance message
 const crypto = require('crypto');
 const fs = require('fs'); //file system module
 const archiver = require('archiver'); //archiver module
@@ -6,37 +7,45 @@ const {PassThrough} = require('stream'); //import passthrough
 const {
     pool
 } = require('./database');
-const mysql = require('mysql2');
-const bcrypt = require('bcrypt'); // bcrypt included
 
 
+// import env
+require('dotenv').config();
 
-// Bcrypting database user info
-//Code for bcrypt
-const saltRounds = 10;
 
-// Function to hash sensitve data before storing it
-async function hashSensitiveData(data) {
-  try {
-      const saltRounds = 10;
-      const salt = await bcrypt.genSalt(saltRounds);
-      const hashedData = await bcrypt.hash(data, salt);
-      return hashedData;
-  } catch (error) {
-      console.error('Error hashing data:', error);
-      throw error;
-  }
+// function to encrypt data using AES
+function encryptData(data) {
+    const iv = crypto.randomBytes(16); //initialization vector
+    // create a cipher instance
+    const cipher = crypto.createCipheriv(process.env.AES_ALGORITHM, Buffer.from(process.env.AES_SECRET_KEY), iv);
+    // encrypts input data from utf8 to hex
+    let encrypted = cipher.update(data, 'utf8', 'hex');
+    // completes encryption and appends final data
+    encrypted += cipher.final('hex');
+    return `${iv.toString('hex')}:${encrypted}`;
+}
+
+// function to decrypt AES encrypted data
+function decryptData(encryptedData){
+    // split encryptedData into iv and encryptedText
+    const [ivHex, encryptedText] = encryptedData.split(':');
+    // create a decipher (decryption instance) to decrypt data using necessary info
+    const decipher = crypto.createDecipheriv(process.env.AES_ALGORITHM, Buffer.from(process.env.AES_SECRET_KEY), Buffer.from(ivHex,'hex'));
+    // process the encrypted text and start decryption
+    let decrypted = decipher.update(encryptedText, 'hex', 'utf8');
+    // complete decryption resulting in utf8 string
+    decrypted += decipher.final('utf8');
+    return decrypted;
 }
 
 
 // Insert file upload data into the database
 async function insertFileUpload(ipAddress, fileName, s3Link) {
   try {  
-
       // Hash the sensitive fields
-      const hashedIpAddress = await hashSensitiveData(ipAddress);
-      const hashedFileName = await hashSensitiveData(fileName);
-      const hashedS3Link = await hashSensitiveData(s3Link);
+      const hashedIpAddress = await encryptData(ipAddress);
+      const hashedFileName = await encryptData(fileName);
+      const hashedS3Link = await encryptData(s3Link);
 
       // Time fields 
       const currentTime = new Date();
