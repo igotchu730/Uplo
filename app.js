@@ -14,12 +14,18 @@ const {
   s3,
   uploadFileMultiPart,
   setPartSize,
-  maxUploadSize
+  maxUploadSize,
 } = require('./cloud');
 const {
   zipper,
-  randomKey
+  randomKey,
+  insertFileUpload,
+  getClientIp,
+  sanitizeFileName
 } = require('./utility');
+
+// allow for reverse proxy
+app.set('trust proxy', true);
 
 // Serve static files from the "mainpage" directory and "assets" folder
 app.use(express.static(path.join(__dirname, 'mainpage')));
@@ -110,13 +116,22 @@ app.post('/upload', upload.array('files'), async (req,res) => {
 
                 // if user title is empty, use original file name
                 if(!title || title.trim() === ''){
-                    title = file.originalname;
+                    const fileNameNoExt  = path.basename(fileName, path.extname(fileName)); // extract file name without ext
+                    const sanitizedFileName = sanitizeFileName(fileNameNoExt); // sanitize name
+                    const fileExt = path.extname(fileName); //extract file extension from mime type
+                    title = `${sanitizedFileName}-${randomKey()}${fileExt}`; // combine to make new title, ext includes '.'. Also added random Key
                 }
                 else{ // otherwise
                     // take user inputed title and reformat with proper extension
                     const fileExt = path.extname(fileName); //extract file extension from mime type
-                    title = `${title}${fileExt}` // combine to make new title, ext includes '.'
+                    const sanitizedFileName = sanitizeFileName(title); // sanitize name
+                    title = `${sanitizedFileName}-${randomKey()}${fileExt}` // combine to make new title, ext includes '.'. Also added random Key
                 }
+
+                // get user IP and downloadlink
+                const userIp = getClientIp(req);
+                console.log('User IP Address:', userIp);
+                const downloadLink = 'https://testlink.com'
 
                 // if file size is less than the set size limit
                 if(file.size < multiThreshold){
@@ -124,12 +139,16 @@ app.post('/upload', upload.array('files'), async (req,res) => {
                     const readStream = fs.createReadStream(filePath);
                     // upload file to s3 using normal upload
                     await uploadFile(readStream, title, fileType);
+                    // insert upload info into MYSQL Database
+                    insertFileUpload(userIp,title,downloadLink,file.size);
                 } // if file size is over set size limit
                 else if(file.size >= multiThreshold){
                     // create a readable stream for the uploaded file using its saved location.
                     const readStream = fs.createReadStream(filePath);
                     // upload file to s3 using multipart upload
                     await uploadFileMultiPart(readStream, title, fileType);
+                    // insert upload info into MYSQL Database
+                    insertFileUpload(userIp,title,downloadLink);
                 }
                 // delete the file temporarily stored in disk
                 fs.unlink(filePath, (err) =>{
@@ -153,9 +172,11 @@ app.post('/upload', upload.array('files'), async (req,res) => {
             // if user title is empty, use a default name
             if (!title || title.trim() === '') {
                 title = 'zipped-files';
-            }
+            };
+
+            const sanitizedFileName = sanitizeFileName(title); // sanitize name
             // else rename file to user title
-            const zippedFileName = `${title}-${randomKey()}.zip`;//`zipped-files-${randomKey()}.zip`;
+            const zippedFileName = `${sanitizedFileName}-${randomKey()}.zip`;//`zipped-files-${randomKey()}.zip`;
             const zippedFilePath = path.join(__dirname, 'uploads', zippedFileName);
 
             // create write stream to specified file path
@@ -170,7 +191,12 @@ app.post('/upload', upload.array('files'), async (req,res) => {
             const zippedFileStats = fs.statSync(zippedFilePath);
             const zippedFileSize = zippedFileStats.size;
 
-             // reject if zip exceeds 2 GB
+            // get user IP and downloadlink
+            const userIp = getClientIp(req);
+            console.log('User IP Address:', userIp);
+            const downloadLink = 'https://testlink.com'
+
+            // reject if zip exceeds 2 GB
             if (zippedFileSize > maxUploadSize) {
                 console.error(`Error: Zipped file ${zippedFileName} exceeds 2GB limit.`);
                 
@@ -187,7 +213,6 @@ app.post('/upload', upload.array('files'), async (req,res) => {
                         else console.log(`${file.originalname} deleted from disk.`);
                     });
                 }
-
                 return res.status(400).send(`Error: Zipped file ${zippedFileName} exceeds 2GB limit.`);
             }
 
@@ -197,9 +222,13 @@ app.post('/upload', upload.array('files'), async (req,res) => {
             // if file size is less than set size limit, upload file to s3 using normal upload
             if(zippedFileSize < multiThreshold){
                 await uploadFile(readStream, zippedFileName, 'application/zip');
+                // insert upload info into MYSQL Database
+                insertFileUpload(userIp,zippedFileName,downloadLink);
             } // if file size is over set size limit, upload file to s3 using multipart upload
             else if(zippedFileSize >= multiThreshold){
                 await uploadFileMultiPart(readStream, zippedFileName, 'application/zip');
+                // insert upload info into MYSQL Database
+                insertFileUpload(userIp,zippedFileName,downloadLink);
             };
 
             // delete the zipped file temporarily stored in disk

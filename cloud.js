@@ -19,20 +19,15 @@ AWS.config.update({
 
 
 
-
 // Create s3 object
 const s3 = new AWS.S3();
 
 
 // function to generate a presigned URL using AWS SDK
 const generatePresignedURL = async(fileName, fileType) => {
-    const extension = fileName.substring(fileName.lastIndexOf('.')); // Extract file extension
-    const baseName = fileName.substring(0,fileName.lastIndexOf('.')); // Extract file name
-    const uniqueFileName = `${baseName}-${randomKey()}${extension}`; // Generate unique file name
-
     const params = {
         Bucket: process.env.S3_BUCKET_NAME, //s3 bucket name
-        Key: uniqueFileName, // name of file
+        Key: fileName, // name of file
         Expires: 300, // expiration time of URL after generation
         ContentType: fileType //file type
     }
@@ -111,12 +106,6 @@ const uploadFileMultiPart = async (readStream, fileName, fileType) => {
     // retrieve file size of uploaded file
     const fileStats = fs.statSync(readStream.path);
     const fileSize = fileStats.size;
-
-    // rename file name to standardized file name for clean storage
-    const extension = fileName.substring(fileName.lastIndexOf('.')); // Extract file extension
-    const baseName = fileName.substring(0,fileName.lastIndexOf('.')); // Extract file name
-    const uniqueFileName = `${baseName}-${randomKey()}${extension}`; // Generate unique file name
-    fileName = uniqueFileName;
 
     // Request presigned URL
     const response = await fetch(`${baseUrl}/initiate-multipart-upload`, {

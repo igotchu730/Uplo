@@ -40,12 +40,20 @@ function decryptData(encryptedData){
 
 
 // Insert file upload data into the database
-async function insertFileUpload(ipAddress, fileName, s3Link) {
+async function insertFileUpload(ipAddress, fileName, s3Link, fileSize) {
   try {  
       // Hash the sensitive fields
-      const hashedIpAddress = await encryptData(ipAddress);
-      const hashedFileName = await encryptData(fileName);
-      const hashedS3Link = await encryptData(s3Link);
+      //const hashedIpAddress = await encryptData(ipAddress);
+      //const hashedFileName = await encryptData(fileName);
+      //const hashedS3Link = await encryptData(s3Link);
+
+      // no encryption to test for mysql database
+      const hashedIpAddress = ipAddress;
+      const hashedFileName = fileName;
+      const hashedS3Link = s3Link;
+
+      // upload size
+      const uploadSize = fileSize;
 
       // Time fields 
       const currentTime = new Date();
@@ -55,8 +63,8 @@ async function insertFileUpload(ipAddress, fileName, s3Link) {
       const id = randomKey();
 
       // Insert the hashed data into the file_uploads table
-      const query = 'INSERT INTO file_uploads (id, ip_address, file_name, s3_link, expiration_date, created_at) VALUES (?, ?, ?, ?, ?, ?)';
-      const values = [id, hashedIpAddress, hashedFileName, hashedS3Link, expirationTime, currentTime];
+      const query = 'INSERT INTO file_uploads (id, ip_address, file_name, s3_link, file_size, expiration_date, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)';
+      const values = [id, hashedIpAddress, hashedFileName, hashedS3Link, uploadSize, expirationTime, currentTime];
 
       pool.query(query, values, (err, results) => {
           if (err) {
@@ -106,10 +114,32 @@ const zipper = async (files) => {
 };
 
 
+// function to get user ip when sending request
+const getClientIp = (req) => {
+    const forwarded = req.headers['x-forwarded-for'];
+    if(forwarded){
+        return forwarded.split(',')[0];
+    }
+    return req.connection.remoteAddress || req.socket.remoteAddress;
+}
+
+
+// function to sanitize titles
+function sanitizeFileName(title) {
+    return title
+        .trim()                            // remove leading/trailing spaces
+        .replace(/[^a-zA-Z0-9._-]/g, '_')  // keep only alphanumeric, dots, underscores, and dashes
+        .replace(/_{2,}/g, '_')            // replace multiple underscores with a single one
+        .slice(0, 255);                    // ensure filename length is within 255 characters
+}
+
+
 // export objects and functions
 module.exports = {
     randomKey,
     zipper,
     pool,
-    insertFileUpload
+    insertFileUpload,
+    getClientIp,
+    sanitizeFileName
 };
