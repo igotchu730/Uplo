@@ -148,7 +148,7 @@ app.post('/upload', upload.array('files'), async (req,res) => {
                     // upload file to s3 using multipart upload
                     await uploadFileMultiPart(readStream, title, fileType);
                     // insert upload info into MYSQL Database
-                    insertFileUpload(userIp,title,downloadLink);
+                    insertFileUpload(userIp,title,downloadLink,file.size);
                 }
                 // delete the file temporarily stored in disk
                 fs.unlink(filePath, (err) =>{
@@ -223,12 +223,12 @@ app.post('/upload', upload.array('files'), async (req,res) => {
             if(zippedFileSize < multiThreshold){
                 await uploadFile(readStream, zippedFileName, 'application/zip');
                 // insert upload info into MYSQL Database
-                insertFileUpload(userIp,zippedFileName,downloadLink);
+                insertFileUpload(userIp,zippedFileName,downloadLink,zippedFileSize);
             } // if file size is over set size limit, upload file to s3 using multipart upload
             else if(zippedFileSize >= multiThreshold){
                 await uploadFileMultiPart(readStream, zippedFileName, 'application/zip');
                 // insert upload info into MYSQL Database
-                insertFileUpload(userIp,zippedFileName,downloadLink);
+                insertFileUpload(userIp,zippedFileName,downloadLink,zippedFileSize);
             };
 
             // delete the zipped file temporarily stored in disk

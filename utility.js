@@ -47,7 +47,7 @@ async function insertFileUpload(ipAddress, fileName, s3Link, fileSize) {
       //const hashedFileName = await encryptData(fileName);
       //const hashedS3Link = await encryptData(s3Link);
 
-      // no encryption to test for mysql database
+      // no encryption to test for mysql database, remove later
       const hashedIpAddress = ipAddress;
       const hashedFileName = fileName;
       const hashedS3Link = s3Link;
