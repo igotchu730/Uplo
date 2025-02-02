@@ -133,6 +133,29 @@ function sanitizeFileName(title) {
         .slice(0, 255);                    // ensure filename length is within 255 characters
 }
 
+// function to delete file upload data from database with corresponding id
+async function deleteFileUpload(id) {
+    return new Promise((resolve, reject) => {
+        const query = 'DELETE FROM file_uploads WHERE id = ?';
+
+        if (!id) {
+            return reject(new Error('ID parameter is missing.'));
+        }
+
+        pool.query(query, [id], (err, results) => {
+            if (err) {
+                console.error('Error deleting file upload:', err);
+                return reject(err);
+            }
+            if (results.affectedRows === 0) {
+                return reject(new Error(`No data found with id: ${id}`));
+            }
+            console.log(`File upload with id ${id} deleted successfully.`);
+            resolve({ message: `File upload with id ${id} deleted successfully.` });
+        });
+    });
+}
+
 
 // export objects and functions
 module.exports = {
@@ -141,5 +164,6 @@ module.exports = {
     pool,
     insertFileUpload,
     getClientIp,
-    sanitizeFileName
+    sanitizeFileName,
+    deleteFileUpload
 };
