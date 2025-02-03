@@ -21,8 +21,11 @@ const {
   randomKey,
   insertFileUpload,
   getClientIp,
-  sanitizeFileName
+  sanitizeFileName,
+  retrieveFileUploadData
 } = require('./utility');
+
+const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
 
 // allow for reverse proxy
 app.set('trust proxy', true);
@@ -133,6 +136,9 @@ app.post('/upload', upload.array('files'), async (req,res) => {
                 console.log('User IP Address:', userIp);
                 const downloadLink = 'https://testlink.com'
 
+                // create unique id for upload
+                const id = randomKey();
+
                 // if file size is less than the set size limit
                 if(file.size < multiThreshold){
                     // create a readable stream for the uploaded file using its saved location.
@@ -140,7 +146,7 @@ app.post('/upload', upload.array('files'), async (req,res) => {
                     // upload file to s3 using normal upload
                     await uploadFile(readStream, title, fileType);
                     // insert upload info into MYSQL Database
-                    insertFileUpload(userIp,title,downloadLink,file.size);
+                    insertFileUpload(id,userIp,title,downloadLink,file.size);
                 } // if file size is over set size limit
                 else if(file.size >= multiThreshold){
                     // create a readable stream for the uploaded file using its saved location.
@@ -148,16 +154,18 @@ app.post('/upload', upload.array('files'), async (req,res) => {
                     // upload file to s3 using multipart upload
                     await uploadFileMultiPart(readStream, title, fileType);
                     // insert upload info into MYSQL Database
-                    insertFileUpload(userIp,title,downloadLink,file.size);
+                    insertFileUpload(id,userIp,title,downloadLink,file.size);
                 }
                 // delete the file temporarily stored in disk
                 fs.unlink(filePath, (err) =>{
                     if(err) console.error(`Error deleting file ${title} from disk.`, err);
                     else console.log(`${title} deleted from disk after upload.`);
                 });
+
+                res.json({ success: true, url: `${baseUrl}/file/${id}` });
             }
             // success
-            res.send('File uploaded and processed successfully.');
+            //res.send('File uploaded and processed successfully.');
       } catch(error){ //error handling
             console.error('Error uploading file: ', error);
             res.status(500).send('Error processing file.');
@@ -196,6 +204,9 @@ app.post('/upload', upload.array('files'), async (req,res) => {
             console.log('User IP Address:', userIp);
             const downloadLink = 'https://testlink.com'
 
+            // create unique id for upload
+            const id = randomKey();
+
             // reject if zip exceeds 2 GB
             if (zippedFileSize > maxUploadSize) {
                 console.error(`Error: Zipped file ${zippedFileName} exceeds 2GB limit.`);
@@ -223,12 +234,12 @@ app.post('/upload', upload.array('files'), async (req,res) => {
             if(zippedFileSize < multiThreshold){
                 await uploadFile(readStream, zippedFileName, 'application/zip');
                 // insert upload info into MYSQL Database
-                insertFileUpload(userIp,zippedFileName,downloadLink,zippedFileSize);
+                insertFileUpload(id,userIp,zippedFileName,downloadLink,zippedFileSize);
             } // if file size is over set size limit, upload file to s3 using multipart upload
             else if(zippedFileSize >= multiThreshold){
                 await uploadFileMultiPart(readStream, zippedFileName, 'application/zip');
                 // insert upload info into MYSQL Database
-                insertFileUpload(userIp,zippedFileName,downloadLink,zippedFileSize);
+                insertFileUpload(id,userIp,zippedFileName,downloadLink,zippedFileSize);
             };
 
             // delete the zipped file temporarily stored in disk
@@ -315,7 +326,7 @@ router.post('/initiate-multipart-upload', async (req,res) =>{
         console.error('Error initiating multipart upload:', error);
         res.status(500).json({ error: 'Failed to initiate multipart upload' });
     };
-})
+});
 
 // route to complete multipart upload
 router.post('/complete-multipart-upload', async (req,res) => {
@@ -325,7 +336,7 @@ router.post('/complete-multipart-upload', async (req,res) => {
 
     if(!uploadId || !fileName || !parts || !Array.isArray(parts)){
         return res.status(400).json({ error: 'Invalid request payload' });
-    }
+    };
 
     try{
         const params = {
@@ -346,6 +357,24 @@ router.post('/complete-multipart-upload', async (req,res) => {
     }catch(error){
         console.error('Error completing multipart upload:', error);
         res.status(500).json({ error: 'Failed to complete multipart upload' });
-    }
+    };
 
-})
+});
+
+
+router.get('/file/:uniqueId', async (req,res) => {
+    const uniqueId = req.params.uniqueId;
+    try{
+        const fileName = await retrieveFileUploadData(uniqueId,'file_name');
+        res.send(`
+            <html>
+            <body>
+                <h1>File: ${fileName}</h1>
+            </body>
+            </html>
+        `);
+    } catch(error){
+        console.error('Error retrieving data:', error);
+        res.status(500).send('Error retrieving file information.');
+    }
+});

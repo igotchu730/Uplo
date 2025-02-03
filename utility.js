@@ -40,7 +40,7 @@ function decryptData(encryptedData){
 
 
 // Insert file upload data into the database
-async function insertFileUpload(ipAddress, fileName, s3Link, fileSize) {
+async function insertFileUpload(id, ipAddress, fileName, s3Link, fileSize) {
   try {  
       // Hash the sensitive fields
       //const hashedIpAddress = await encryptData(ipAddress);
@@ -58,9 +58,6 @@ async function insertFileUpload(ipAddress, fileName, s3Link, fileSize) {
       // Time fields 
       const currentTime = new Date();
       const expirationTime = new Date(currentTime.getTime() + 24 * 60 * 60 * 1000);
-      
-      // Randomized ID field
-      const id = randomKey();
 
       // Insert the hashed data into the file_uploads table
       const query = 'INSERT INTO file_uploads (id, ip_address, file_name, s3_link, file_size, expiration_date, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)';
@@ -76,6 +73,77 @@ async function insertFileUpload(ipAddress, fileName, s3Link, fileSize) {
   } catch (error) {
       console.error('Error in insertFileUpload:', error);
   }
+}
+
+// function to delete file upload data from database with corresponding id
+async function deleteFileUpload(id) {
+    return new Promise((resolve, reject) => {
+        // Insert the hashed data into the file_uploads table
+        const query = 'DELETE FROM file_uploads WHERE id = ?';
+
+        // Make sure id is present in parameters
+        if (!id) {
+            return reject(new Error('ID parameter is missing.'));
+        }
+
+        // send query
+        pool.query(query, [id], (err, results) => {
+            // error handling
+            if (err) {
+                console.error('Error deleting file upload:', err);
+                return reject(err);
+            }
+            if (results.affectedRows === 0) {
+                return reject(new Error(`No data found with id: ${id}`));
+            }
+            // success
+            console.log(`File upload with id: ${id}, deleted successfully.`);
+            resolve({ message: `File upload with id: ${id}, deleted successfully.` });
+        });
+    });
+}
+
+// function to retrieve file upload data from database with corresponding id
+async function retrieveFileUploadData(id, field) {
+    return new Promise((resolve, reject) => {
+
+        // Define allowed fields to prevent SQL injection
+        const allowedFields = ['ip_address', 'file_name', 's3_link', 'file_size', 'expiration_date', 'created_at'];
+
+        // Validate the field input
+        if (!allowedFields.includes(field)) {
+            return reject(new Error(`Invalid field requested: ${field}`));
+        }
+
+        // Make sure id is present in parameters
+        if (!id) {
+            return reject(new Error('ID parameter is missing.'));
+        }
+
+        // Insert the hashed data into the file_uploads table
+        const query = `SELECT ?? FROM file_uploads WHERE id = ?`;
+
+        // send query
+        pool.query(query, [field,id], (err, results) => {
+            // error handling
+            if (err) {
+                console.error('Error retrieving file upload data:', err);
+                return reject(err);
+            }
+            // check if any data is retrieved
+            if (results.length === 0){
+                return reject(new Error(`No data found with id: ${id}`));
+            }
+            // success
+            console.log(`File upload data with id: ${id}, retrieved successfully.`);
+            // retrieve from the results array, the requested field
+            resolve(results[0][field]);
+        });
+    }).then(data => { // 
+        // return data
+        console.log(`${field} retrieved:`, data);
+        return data;
+    });
 }
 
 
@@ -116,11 +184,11 @@ const zipper = async (files) => {
 
 // function to get user ip when sending request
 const getClientIp = (req) => {
-    const forwarded = req.headers['x-forwarded-for'];
+    const forwarded = req.headers['x-forwarded-for']; // get client ip from reverse proxy
     if(forwarded){
-        return forwarded.split(',')[0];
+        return forwarded.split(',')[0]; //retrieve the first ip returned. That's the client's ip
     }
-    return req.connection.remoteAddress || req.socket.remoteAddress;
+    return req.connection.remoteAddress || req.socket.remoteAddress; //fallbacks
 }
 
 
@@ -133,28 +201,7 @@ function sanitizeFileName(title) {
         .slice(0, 255);                    // ensure filename length is within 255 characters
 }
 
-// function to delete file upload data from database with corresponding id
-async function deleteFileUpload(id) {
-    return new Promise((resolve, reject) => {
-        const query = 'DELETE FROM file_uploads WHERE id = ?';
 
-        if (!id) {
-            return reject(new Error('ID parameter is missing.'));
-        }
-
-        pool.query(query, [id], (err, results) => {
-            if (err) {
-                console.error('Error deleting file upload:', err);
-                return reject(err);
-            }
-            if (results.affectedRows === 0) {
-                return reject(new Error(`No data found with id: ${id}`));
-            }
-            console.log(`File upload with id ${id} deleted successfully.`);
-            resolve({ message: `File upload with id ${id} deleted successfully.` });
-        });
-    });
-}
 
 
 // export objects and functions
@@ -165,5 +212,6 @@ module.exports = {
     insertFileUpload,
     getClientIp,
     sanitizeFileName,
-    deleteFileUpload
+    deleteFileUpload,
+    retrieveFileUploadData
 };
