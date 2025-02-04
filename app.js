@@ -391,32 +391,35 @@ router.get('/file/:uniqueId', async (req,res) => {
         // media type for Open Graph, to display in media sites etc
         let ogType = "website";
         let ogMediaTags = ""; // Store the  media tags
-        let ogImage = presignedUrl; // Default to the file itself, if applicable
+        let ogImage = defaultThumbnail; // Default to a generic thumbnail
 
         // for imgs
         if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExt)) {
             ogType = "image";
+            ogImage = presignedUrl;
         // for videos
         } else if (['mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv'].includes(fileExt)) {
-            ogType = "video.other";
-            ogMediaTags = `<meta property="og:video" content="${presignedUrl}" />
-                           <meta property="og:video:type" content="video/mp4" />`;
+            ogType = "video";
+            ogMediaTags = presignedUrl;
+            ogMediaTags = `
+                <meta property="og:video" content="${presignedUrl}" />
+                <meta property="og:video:secure_url" content="${presignedUrl}" />
+                <meta property="og:video:type" content="video/mp4" />
+                <meta property="og:video:width" content="1280" />
+                <meta property="og:video:height" content="720" />
+            `;
         // for audio
         } else if (['mp3', 'wav', 'flac', 'aac', 'ogg'].includes(fileExt)) {
             ogType = "music.song";
             ogMediaTags = `<meta property="og:audio" content="${presignedUrl}" />
                            <meta property="og:audio:type" content="audio/mpeg" />`;
-        } else {
-            // file type is unknown, use a generic thumbnail
-            ogType = "website";
-            ogImage = defaultThumbnail;
         }
 
         //html for new page
         res.send(`
             <html>
             <head>
-                <title>Uplo</title>
+                <title>Uplo - View File</title>
                 <meta property="og:title" content="View File: ${fileName}" />
                 <meta property="og:description" content="Click to view or download this file." />
                 <meta property="og:type" content="${ogType}" />
