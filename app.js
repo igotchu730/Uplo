@@ -15,6 +15,7 @@ const {
   uploadFileMultiPart,
   setPartSize,
   maxUploadSize,
+  generatePresignedURLView,
 } = require('./cloud');
 const {
   zipper,
@@ -22,7 +23,8 @@ const {
   insertFileUpload,
   getClientIp,
   sanitizeFileName,
-  retrieveFileUploadData
+  retrieveFileUploadData,
+  generateFileEmbed
 } = require('./utility');
 
 const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
@@ -62,7 +64,6 @@ app.listen(PORT, () => {
     res.status(500).json({ error: 'Error generating presigned URL' })
   };
 });
-
 
 
 // Custom storage to handle files as streams
@@ -133,7 +134,6 @@ app.post('/upload', upload.array('files'), async (req,res) => {
 
                 // get user IP and downloadlink
                 const userIp = getClientIp(req);
-                console.log('User IP Address:', userIp);
                 const downloadLink = 'https://testlink.com'
 
                 // create unique id for upload
@@ -203,7 +203,7 @@ app.post('/upload', upload.array('files'), async (req,res) => {
 
             // get user IP and downloadlink
             const userIp = getClientIp(req);
-            console.log('User IP Address:', userIp);
+            //console.log('User IP Address:', userIp);
             const downloadLink = 'https://testlink.com'
 
             // create unique id for upload
@@ -323,7 +323,6 @@ router.post('/initiate-multipart-upload', async (req,res) =>{
         console.error('AWS Error Response:', err.message);
     }
 }
-
         // response
         res.json({uploadId: UploadId, parts: presignedUrls});
 
@@ -370,18 +369,91 @@ router.post('/complete-multipart-upload', async (req,res) => {
 router.get('/file/:uniqueId', async (req,res) => {
     // retrieve file id from request for use
     const uniqueId = req.params.uniqueId;
+
+    if (!uniqueId) {
+        return res.status(400).send("Error: Missing file ID.");
+    }
+
     try{
+        // retrieve file name from database using id
         const fileName = await retrieveFileUploadData(uniqueId,'file_name');
+        if (!fileName) {
+            throw new Error(`No data found with id: ${uniqueId}`);
+        }
+        // determine file type by extracting ext
+        const fileExt = fileName.split('.').pop().toLowerCase();
+        // generate presigned url
+        const presignedUrl = await generatePresignedURLView(fileName);
+
+        // default generic thumbnail for unspecified file types
+        const defaultThumbnail = `${baseUrl}/assets/testImg.png`; 
+
+        // media type for Open Graph, to display in media sites etc
+        let ogType = "website";
+        let ogMediaTags = ""; // Store the  media tags
+        let ogImage = presignedUrl; // Default to the file itself, if applicable
+
+        // for imgs
+        if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExt)) {
+            ogType = "image";
+        // for videos
+        } else if (['mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv'].includes(fileExt)) {
+            ogType = "video.other";
+            ogMediaTags = `<meta property="og:video" content="${presignedUrl}" />
+                           <meta property="og:video:type" content="video/mp4" />`;
+        // for audio
+        } else if (['mp3', 'wav', 'flac', 'aac', 'ogg'].includes(fileExt)) {
+            ogType = "music.song";
+            ogMediaTags = `<meta property="og:audio" content="${presignedUrl}" />
+                           <meta property="og:audio:type" content="audio/mpeg" />`;
+        } else {
+            // file type is unknown, use a generic thumbnail
+            ogType = "website";
+            ogImage = defaultThumbnail;
+        }
+
         //html for new page
         res.send(`
             <html>
+            <head>
+                <title>Uplo</title>
+                <meta property="og:title" content="View File: ${fileName}" />
+                <meta property="og:description" content="Click to view or download this file." />
+                <meta property="og:type" content="${ogType}" />
+                <meta property="og:url" content="${baseUrl}/file/${uniqueId}" />
+                <meta property="og:image" content="${ogImage}" />
+                <meta property="og:site_name" content="Uplo File Sharing" />
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:image" content="${ogImage}" />
+                ${ogMediaTags}
+            </head>
             <body>
                 <h1>File: ${fileName}</h1>
+                <div>
+                    ${generateFileEmbed(fileExt,presignedUrl)}
+                </div>
+                <button id="downloadBtn" data-url="${presignedUrl}">Download File</button>
+                <script>
+                    //listens for button click.
+                    document.getElementById('downloadBtn').addEventListener('click', function() {
+
+                        //get stored presigned url
+                        const url = this.getAttribute('data-url');
+                        console.log("Download URL:", url);
+                        if (!url) {
+                            console.error("Error: No download URL found.");
+                            return;
+                        }
+
+                        // redirects browser to given url
+                        window.location.href = url;
+                    });
+                </script>
             </body>
             </html>
         `);
     } catch(error){ //error handling
         console.error('Error retrieving data:', error);
-        res.status(500).send('Error retrieving file information.');
+        res.status(500).send(`Error retrieving file information: ${error.message}`);
     }
 });

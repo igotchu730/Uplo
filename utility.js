@@ -203,7 +203,38 @@ function sanitizeFileName(title) {
         .slice(0, 255);                    // ensure filename length is within 255 characters
 }
 
-
+// function to generate correct html based on retrieved file type
+const generateFileEmbed = (fileExtension, url) => {
+    if (['mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv'].includes(fileExtension)) {
+        return `<video controls width="600"><source src="${url}" type="video/${fileExtension}">Your browser does not support video.</video>`;
+    }
+    if (['mp3', 'wav', 'ogg', 'flac', 'aac'].includes(fileExtension)) {
+        return `<audio controls><source src="${url}" type="audio/${fileExtension}">Your browser does not support audio.</audio>`;
+    }
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tiff', 'svg'].includes(fileExtension)) {
+        return `<img src="${url}" alt="Image Preview" width="600"/>`;
+    }
+    if (['pdf'].includes(fileExtension)) {
+        return `<iframe src="${url}" width="600" height="800"></iframe>`;
+    }
+    if (['txt', 'md'].includes(fileExtension)) {
+        return `<pre style="width: 600px; overflow: auto; border: 1px solid #ddd; padding: 10px;"><code>Fetching file...</code></pre>
+                <script>
+                    fetch("${url}")
+                        .then(response => response.text())
+                        .then(text => document.querySelector("pre code").textContent = text)
+                        .catch(err => console.error("Error loading file:", err));
+                </script>`;
+    }
+    if (['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(fileExtension)) {
+        return `<iframe src="https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(url)}" width="600" height="800"></iframe>
+                <p><a href="${url}" target="_blank">Open in Microsoft Office</a></p>`;
+    }
+    if (['zip', 'rar', '7z', 'tar', 'gz'].includes(fileExtension)) {
+        return `<p>Compressed file detected. <a href="${url}" download>Download File</a></p>`;
+    }
+    return `<p>File preview is not available. <a href="${url}" download>Download File</a></p>`;
+};
 
 
 // export objects and functions
@@ -215,5 +246,6 @@ module.exports = {
     getClientIp,
     sanitizeFileName,
     deleteFileUpload,
-    retrieveFileUploadData
+    retrieveFileUploadData,
+    generateFileEmbed
 };

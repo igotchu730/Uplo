@@ -41,6 +41,24 @@ const generatePresignedURL = async(fileName, fileType) => {
     }
 };
 
+// function to generate a presigned URL for viewing objeects in s3 using AWS SDK
+const generatePresignedURLView = async(fileKey, fileExt) => {
+    const params = {
+        Bucket: process.env.S3_BUCKET_NAME, //s3 bucket name
+        Key: fileKey, // name of file
+        Expires: 300, // expiration time of URL after generation
+        ResponseContentDisposition: 'attachment' // force download when s3 link is visted
+    }
+    try {
+        const url = await s3.getSignedUrlPromise('getObject', params);
+        //console.log("Generated presigned URL:", url);
+        return url;
+    } catch (error) { // error handling
+        console.error("AWS error generating presigned URL:", error);
+        throw error;
+    }
+};
+
 
 
 // Upload functions
@@ -187,5 +205,6 @@ module.exports = {
     uploadFile,
     uploadFileMultiPart,
     setPartSize,
-    maxUploadSize
+    maxUploadSize,
+    generatePresignedURLView
 };
