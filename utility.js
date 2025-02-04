@@ -40,17 +40,19 @@ function decryptData(encryptedData){
 
 
 // Insert file upload data into the database
-async function insertFileUpload(id, ipAddress, fileName, s3Link, fileSize) {
+async function insertFileUpload(id, ipAddress, fileName, pageLink, s3Link, fileSize) {
   try {  
       // Hash the sensitive fields
       //const hashedIpAddress = await encryptData(ipAddress);
       //const hashedFileName = await encryptData(fileName);
       //const hashedS3Link = await encryptData(s3Link);
+      //const hashedPageLink = await encryptData(pageLink);
 
       // no encryption to test for mysql database, remove later
       const hashedIpAddress = ipAddress;
       const hashedFileName = fileName;
       const hashedS3Link = s3Link;
+      const hashedPageLink = pageLink;
 
       // upload size
       const uploadSize = fileSize;
@@ -60,8 +62,8 @@ async function insertFileUpload(id, ipAddress, fileName, s3Link, fileSize) {
       const expirationTime = new Date(currentTime.getTime() + 24 * 60 * 60 * 1000);
 
       // Insert the hashed data into the file_uploads table
-      const query = 'INSERT INTO file_uploads (id, ip_address, file_name, s3_link, file_size, expiration_date, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)';
-      const values = [id, hashedIpAddress, hashedFileName, hashedS3Link, uploadSize, expirationTime, currentTime];
+      const query = 'INSERT INTO file_uploads (id, ip_address, file_name, page_link, s3_link, file_size, expiration_date, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+      const values = [id, hashedIpAddress, hashedFileName, hashedPageLink, hashedS3Link, uploadSize, expirationTime, currentTime];
 
       pool.query(query, values, (err, results) => {
           if (err) {
@@ -108,7 +110,7 @@ async function retrieveFileUploadData(id, field) {
     return new Promise((resolve, reject) => {
 
         // Define allowed fields to prevent SQL injection
-        const allowedFields = ['ip_address', 'file_name', 's3_link', 'file_size', 'expiration_date', 'created_at'];
+        const allowedFields = ['ip_address', 'file_name', 'page_link', 's3_link', 'file_size', 'expiration_date', 'created_at'];
 
         // Validate the field input
         if (!allowedFields.includes(field)) {

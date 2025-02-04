@@ -139,6 +139,9 @@ app.post('/upload', upload.array('files'), async (req,res) => {
                 // create unique id for upload
                 const id = randomKey();
 
+                // create page link
+                const pageLink = `${baseUrl}/file/${id}`;
+
                 // if file size is less than the set size limit
                 if(file.size < multiThreshold){
                     // create a readable stream for the uploaded file using its saved location.
@@ -146,7 +149,7 @@ app.post('/upload', upload.array('files'), async (req,res) => {
                     // upload file to s3 using normal upload
                     await uploadFile(readStream, title, fileType);
                     // insert upload info into MYSQL Database
-                    insertFileUpload(id,userIp,title,downloadLink,file.size);
+                    insertFileUpload(id,userIp,title,pageLink,downloadLink,file.size);
                 } // if file size is over set size limit
                 else if(file.size >= multiThreshold){
                     // create a readable stream for the uploaded file using its saved location.
@@ -154,7 +157,7 @@ app.post('/upload', upload.array('files'), async (req,res) => {
                     // upload file to s3 using multipart upload
                     await uploadFileMultiPart(readStream, title, fileType);
                     // insert upload info into MYSQL Database
-                    insertFileUpload(id,userIp,title,downloadLink,file.size);
+                    insertFileUpload(id,userIp,title,pageLink,downloadLink,file.size);
                 }
                 // delete the file temporarily stored in disk
                 fs.unlink(filePath, (err) =>{
@@ -162,10 +165,9 @@ app.post('/upload', upload.array('files'), async (req,res) => {
                     else console.log(`${title} deleted from disk after upload.`);
                 });
 
-                res.json({ success: true, url: `${baseUrl}/file/${id}` });
+                // respond by showing link to new page
+                res.json({ success: true, url: pageLink });
             }
-            // success
-            //res.send('File uploaded and processed successfully.');
       } catch(error){ //error handling
             console.error('Error uploading file: ', error);
             res.status(500).send('Error processing file.');
@@ -207,6 +209,9 @@ app.post('/upload', upload.array('files'), async (req,res) => {
             // create unique id for upload
             const id = randomKey();
 
+            // create page link
+            const pageLink = `${baseUrl}/file/${id}`;
+
             // reject if zip exceeds 2 GB
             if (zippedFileSize > maxUploadSize) {
                 console.error(`Error: Zipped file ${zippedFileName} exceeds 2GB limit.`);
@@ -234,12 +239,12 @@ app.post('/upload', upload.array('files'), async (req,res) => {
             if(zippedFileSize < multiThreshold){
                 await uploadFile(readStream, zippedFileName, 'application/zip');
                 // insert upload info into MYSQL Database
-                insertFileUpload(id,userIp,zippedFileName,downloadLink,zippedFileSize);
+                insertFileUpload(id,userIp,zippedFileName,pageLink,downloadLink,zippedFileSize);
             } // if file size is over set size limit, upload file to s3 using multipart upload
             else if(zippedFileSize >= multiThreshold){
                 await uploadFileMultiPart(readStream, zippedFileName, 'application/zip');
                 // insert upload info into MYSQL Database
-                insertFileUpload(id,userIp,zippedFileName,downloadLink,zippedFileSize);
+                insertFileUpload(id,userIp,zippedFileName,pageLink,downloadLink,zippedFileSize);
             };
 
             // delete the zipped file temporarily stored in disk
@@ -255,8 +260,8 @@ app.post('/upload', upload.array('files'), async (req,res) => {
                 });
             };
 
-            // success
-            res.send('File uploaded and processed successfully.');
+            // respond by showing link to new page
+            res.json({ success: true, url: pageLink });
 
         } catch(error){ //error handling
             console.error('Error uploading file: ', error);
@@ -361,11 +366,13 @@ router.post('/complete-multipart-upload', async (req,res) => {
 
 });
 
-
+// when route is accessed, it dynamically creates a page for the request file
 router.get('/file/:uniqueId', async (req,res) => {
+    // retrieve file id from request for use
     const uniqueId = req.params.uniqueId;
     try{
         const fileName = await retrieveFileUploadData(uniqueId,'file_name');
+        //html for new page
         res.send(`
             <html>
             <body>
@@ -373,7 +380,7 @@ router.get('/file/:uniqueId', async (req,res) => {
             </body>
             </html>
         `);
-    } catch(error){
+    } catch(error){ //error handling
         console.error('Error retrieving data:', error);
         res.status(500).send('Error retrieving file information.');
     }

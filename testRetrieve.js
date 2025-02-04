@@ -2,7 +2,7 @@ const{
     retrieveFileUploadData,
 } = require('./utility');
 
-const id = '6ec427da0b062c38c464e689d48ce38c'
-const field = 'file_size'
+const id = 'cd863aada2889aed2436aa0d30bc51d2'
+const field = 'page_link'
 
 const retrievedData = retrieveFileUploadData(id, field);
