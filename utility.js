@@ -43,16 +43,16 @@ function decryptData(encryptedData){
 async function insertFileUpload(id, ipAddress, fileName, pageLink, s3Link, fileSize) {
   try {  
       // Hash the sensitive fields
-      //const hashedIpAddress = await encryptData(ipAddress);
-      //const hashedFileName = await encryptData(fileName);
-      //const hashedS3Link = await encryptData(s3Link);
-      //const hashedPageLink = await encryptData(pageLink);
+      const hashedIpAddress = await encryptData(ipAddress);
+      const hashedFileName = await encryptData(fileName);
+      const hashedS3Link = await encryptData(s3Link);
+      const hashedPageLink = await encryptData(pageLink);
 
       // no encryption to test for mysql database, remove later
-      const hashedIpAddress = ipAddress;
-      const hashedFileName = fileName;
-      const hashedS3Link = s3Link;
-      const hashedPageLink = pageLink;
+      //const hashedIpAddress = ipAddress;
+      //const hashedFileName = fileName;
+      //const hashedS3Link = s3Link;
+      //const hashedPageLink = pageLink;
 
       // upload size
       const uploadSize = fileSize;
@@ -75,6 +75,40 @@ async function insertFileUpload(id, ipAddress, fileName, pageLink, s3Link, fileS
   } catch (error) {
       console.error('Error in insertFileUpload:', error);
   }
+}
+
+// Insert file upload data into the database at given id
+async function updateS3Link(id, data) {
+    try { 
+        // Make sure id is present in parameters
+        if (!id) {
+            return reject(new Error('ID parameter is missing.'));
+        }
+
+        // Hash the sensitive fields
+        const hashedData = await encryptData(data);
+  
+        // no encryption to test for mysql database, remove later
+        //const hashedData = data;
+  
+        // Insert the hashed data into the file_uploads table
+        const query = `UPDATE file_uploads SET s3_link = ? WHERE id = ?`;
+        const values = [hashedData,id];
+
+        pool.query(query, values, (err, results) => {
+            if (err) {
+                console.error('Error updating s3 link:', err);
+                return;
+            }
+            if (results.affectedRows === 0) {
+                console.error(`No matching id found: ${id}`);
+                return;
+            }
+            console.log('S3 link updated successfully.');
+        });
+    } catch (error) {
+        console.error('Error in updateS3Link:', error);
+    }
 }
 
 // function to delete file upload data from database with corresponding id
@@ -143,6 +177,7 @@ async function retrieveFileUploadData(id, field) {
         });
     }).then(data => { // 
         // return data
+        //data = decryptData(data); //testing decryption
         console.log(`${field} retrieved:`, data);
         return data;
     });
@@ -248,4 +283,6 @@ module.exports = {
     deleteFileUpload,
     retrieveFileUploadData,
     generateFileEmbed,
+    updateS3Link,
+    decryptData
 };

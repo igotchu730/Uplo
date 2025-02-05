@@ -25,6 +25,8 @@ const {
   sanitizeFileName,
   retrieveFileUploadData,
   generateFileEmbed,
+  updateS3Link,
+  decryptData
 } = require('./utility');
 
 const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
@@ -169,7 +171,9 @@ app.post('/upload', upload.array('files'), async (req,res) => {
                 // respond by showing link to new page
                 //res.json({ success: true, url: pageLink });
                 // respond by redirecting to new page
-                res.redirect(pageLink);
+                setTimeout(() => {
+                    res.redirect(pageLink);
+                }, 500); //wait .5 seconds
 
             }
       } catch(error){ //error handling
@@ -267,7 +271,9 @@ app.post('/upload', upload.array('files'), async (req,res) => {
             // respond by showing link to new page
             //res.json({ success: true, url: pageLink });
             // respond by redirecting to new page
-            res.redirect(pageLink);
+            setTimeout(() => {
+                res.redirect(pageLink);
+            }, 500); //wait .5 seconds
 
         } catch(error){ //error handling
             console.error('Error uploading file: ', error);
@@ -382,7 +388,8 @@ router.get('/file/:uniqueId', async (req,res) => {
 
     try{
         // retrieve file name from database using id
-        const fileName = await retrieveFileUploadData(uniqueId,'file_name');
+        const retrievedfileName = await retrieveFileUploadData(uniqueId,'file_name');
+        const fileName = decryptData(retrievedfileName);
         if (!fileName) {
             throw new Error(`No data found with id: ${uniqueId}`);
         }
@@ -390,6 +397,8 @@ router.get('/file/:uniqueId', async (req,res) => {
         const fileExt = fileName.split('.').pop().toLowerCase();
         // generate presigned url
         const presignedUrl = await generatePresignedURLView(fileName);
+        //update s3 link
+        updateS3Link(uniqueId,presignedUrl);
 
         // default generic thumbnail for unspecified file types
         const defaultThumbnail = genericImg; 
