@@ -24,10 +24,11 @@ const {
   getClientIp,
   sanitizeFileName,
   retrieveFileUploadData,
-  generateFileEmbed
+  generateFileEmbed,
 } = require('./utility');
 
 const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+const genericImg = `${baseUrl}/assets/testImg.png`;
 
 // allow for reverse proxy
 app.set('trust proxy', true);
@@ -166,7 +167,10 @@ app.post('/upload', upload.array('files'), async (req,res) => {
                 });
 
                 // respond by showing link to new page
-                res.json({ success: true, url: pageLink });
+                //res.json({ success: true, url: pageLink });
+                // respond by redirecting to new page
+                res.redirect(pageLink);
+
             }
       } catch(error){ //error handling
             console.error('Error uploading file: ', error);
@@ -261,7 +265,9 @@ app.post('/upload', upload.array('files'), async (req,res) => {
             };
 
             // respond by showing link to new page
-            res.json({ success: true, url: pageLink });
+            //res.json({ success: true, url: pageLink });
+            // respond by redirecting to new page
+            res.redirect(pageLink);
 
         } catch(error){ //error handling
             console.error('Error uploading file: ', error);
@@ -386,33 +392,25 @@ router.get('/file/:uniqueId', async (req,res) => {
         const presignedUrl = await generatePresignedURLView(fileName);
 
         // default generic thumbnail for unspecified file types
-        const defaultThumbnail = `${baseUrl}/assets/testImg.png`; 
+        const defaultThumbnail = genericImg; 
 
         // media type for Open Graph, to display in media sites etc
         let ogType = "website";
         let ogMediaTags = ""; // Store the  media tags
         let ogImage = defaultThumbnail; // Default to a generic thumbnail
 
-        // for imgs
+        // for imgs, embed the img
         if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExt)) {
             ogType = "image";
             ogImage = presignedUrl;
-        // for videos
+        // for videos, try to embed
         } else if (['mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv'].includes(fileExt)) {
             ogType = "video";
-            ogMediaTags = presignedUrl;
             ogMediaTags = `
                 <meta property="og:video" content="${presignedUrl}" />
                 <meta property="og:video:secure_url" content="${presignedUrl}" />
                 <meta property="og:video:type" content="video/mp4" />
-                <meta property="og:video:width" content="1280" />
-                <meta property="og:video:height" content="720" />
             `;
-        // for audio
-        } else if (['mp3', 'wav', 'flac', 'aac', 'ogg'].includes(fileExt)) {
-            ogType = "music.song";
-            ogMediaTags = `<meta property="og:audio" content="${presignedUrl}" />
-                           <meta property="og:audio:type" content="audio/mpeg" />`;
         }
 
         //html for new page
@@ -429,6 +427,10 @@ router.get('/file/:uniqueId', async (req,res) => {
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:image" content="${ogImage}" />
                 ${ogMediaTags}
+
+                <!-- Favicon & Theme Color -->
+                <link rel="icon" href="${genericImg}" />
+                <meta name="theme-color" content="#FA8072" />
             </head>
             <body>
                 <h1>File: ${fileName}</h1>

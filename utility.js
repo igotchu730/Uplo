@@ -247,5 +247,5 @@ module.exports = {
     sanitizeFileName,
     deleteFileUpload,
     retrieveFileUploadData,
-    generateFileEmbed
+    generateFileEmbed,
 };

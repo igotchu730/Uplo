@@ -42,12 +42,12 @@ const generatePresignedURL = async(fileName, fileType) => {
 };
 
 // function to generate a presigned URL for viewing objeects in s3 using AWS SDK
-const generatePresignedURLView = async(fileKey, fileExt) => {
+const generatePresignedURLView = async(fileKey) => {
     const params = {
         Bucket: process.env.S3_BUCKET_NAME, //s3 bucket name
         Key: fileKey, // name of file
-        Expires: 300, // expiration time of URL after generation
-        ResponseContentDisposition: 'attachment' // force download when s3 link is visted
+        Expires: 86400, // expiration time of URL after generation
+        ResponseContentDisposition: `attachment; filename="${fileKey}"`, // force download when s3 link is visted
     }
     try {
         const url = await s3.getSignedUrlPromise('getObject', params);
