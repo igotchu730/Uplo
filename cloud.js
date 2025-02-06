@@ -41,7 +41,7 @@ const generatePresignedURL = async(fileName, fileType) => {
     }
 };
 
-// function to generate a presigned URL for viewing objeects in s3 using AWS SDK
+// function to generate a presigned URL for viewing objects in s3 using AWS SDK
 const generatePresignedURLView = async(fileKey) => {
     const params = {
         Bucket: process.env.S3_BUCKET_NAME, //s3 bucket name

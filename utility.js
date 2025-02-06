@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const fs = require('fs'); //file system module
 const archiver = require('archiver'); //archiver module
 const {PassThrough} = require('stream'); //import passthrough
+const {DateTime} = require('luxon'); //for setting time
 
 const {
     pool
@@ -58,8 +59,10 @@ async function insertFileUpload(id, ipAddress, fileName, pageLink, s3Link, fileS
       const uploadSize = fileSize;
 
       // Time fields 
-      const currentTime = new Date();
-      const expirationTime = new Date(currentTime.getTime() + 24 * 60 * 60 * 1000);
+      // Get current time in PST, and adjust format for mysql
+      const currentTime = DateTime.now().setZone('America/Los_Angeles').toSQL({ includeOffset: false });
+      // Expiration time (set to 24 hours later), and adjust format for mysql
+      const expirationTime = DateTime.now().setZone('America/Los_Angeles').plus({ hours: 24 }).toSQL({ includeOffset: false });
 
       // Insert the hashed data into the file_uploads table
       const query = 'INSERT INTO file_uploads (id, ip_address, file_name, page_link, s3_link, file_size, expiration_date, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
