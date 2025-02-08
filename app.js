@@ -26,7 +26,8 @@ const {
   retrieveFileUploadData,
   generateFileEmbed,
   updateS3Link,
-  decryptData
+  decryptData,
+  trackReadProgress
 } = require('./utility');
 
 const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
@@ -156,7 +157,8 @@ app.post('/upload', upload.array('files'), async (req,res) => {
                 } // if file size is over set size limit
                 else if(file.size >= multiThreshold){
                     // create a readable stream for the uploaded file using its saved location.
-                    const readStream = fs.createReadStream(filePath);
+                    // use trackreadprogress to track the reading progress
+                    const readStream = trackReadProgress(filePath);
                     // upload file to s3 using multipart upload
                     await uploadFileMultiPart(readStream, title, fileType);
                     // insert upload info into MYSQL Database
@@ -241,15 +243,20 @@ app.post('/upload', upload.array('files'), async (req,res) => {
             }
 
             // create read stream to zip file
-            const readStream = fs.createReadStream(zippedFilePath);
+            //const readStream = fs.createReadStream(zippedFilePath);
 
             // if file size is less than set size limit, upload file to s3 using normal upload
             if(zippedFileSize < multiThreshold){
+                // create read stream to zip file
+                const readStream = fs.createReadStream(zippedFilePath);
                 await uploadFile(readStream, zippedFileName, 'application/zip');
                 // insert upload info into MYSQL Database
                 insertFileUpload(id,userIp,zippedFileName,pageLink,downloadLink,zippedFileSize);
             } // if file size is over set size limit, upload file to s3 using multipart upload
             else if(zippedFileSize >= multiThreshold){
+                // create read stream to zip file
+                // use trackreadprogress to track the reading progress
+                const readStream = trackReadProgress(zippedFilePath);
                 await uploadFileMultiPart(readStream, zippedFileName, 'application/zip');
                 // insert upload info into MYSQL Database
                 insertFileUpload(id,userIp,zippedFileName,pageLink,downloadLink,zippedFileSize);

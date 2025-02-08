@@ -4,6 +4,7 @@ const fs = require('fs'); //file system module
 const archiver = require('archiver'); //archiver module
 const {PassThrough} = require('stream'); //import passthrough
 const {DateTime} = require('luxon'); //for setting time
+const EventEmitter = require('events')
 
 const {
     pool
@@ -275,6 +276,41 @@ const generateFileEmbed = (fileExtension, url) => {
 };
 
 
+// create new event emitter
+const progressEmitter = new EventEmitter();
+const trackReadProgress = (filePath) => {
+    // create read stream to the filepath
+    const readStream = fs.createReadStream(filePath);
+    let totalBytesRead = 0; // keeps track of the number of bytes read so far
+    const fileSize = fs.statSync(filePath).size; // get file size
+    let lastLoggedProgress = 0; // stores the last logged progress
+
+    // when data chunks are read from stream...
+    readStream.on('data',(chunk) =>{
+        totalBytesRead += chunk.length; // update how many bytes have been read
+        const readProgress = ((totalBytesRead/fileSize)*100).toFixed(2); // calculate percentage
+        
+        // update progress every 5%
+        if(readProgress - lastLoggedProgress >= 5){
+            //console.log(`Reading progress: ${readProgress}`);
+            progressEmitter.emit('readProgress', readProgress); // emit readProgress
+            lastLoggedProgress = readProgress;
+        }
+    });
+    // on success
+    readStream.on('end', () => {
+        //console.log('Read stream completed.');
+        progressEmitter.emit('readProgress',100)
+    });
+    // error handling
+    readStream.on('error', (err) => {
+        console.error('Read stream error:', err);
+        progressEmitter.emit('readError', err);
+    });
+    return readStream;
+}
+
+
 // export objects and functions
 module.exports = {
     randomKey,
@@ -287,5 +323,7 @@ module.exports = {
     retrieveFileUploadData,
     generateFileEmbed,
     updateS3Link,
-    decryptData
+    decryptData,
+    progressEmitter,
+    trackReadProgress
 };

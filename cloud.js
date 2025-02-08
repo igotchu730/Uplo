@@ -1,6 +1,8 @@
 // import objects and functions from other files
 const {
-    randomKey
+    randomKey,
+    progressEmitter,
+    trackReadProgress
 } = require('./utility');
 
 // import env
@@ -141,8 +143,6 @@ const uploadFileMultiPart = async (readStream, fileName, fileType) => {
 
     // Retrieve response
     const {uploadId, parts} = await response.json();
-      
-
     console.log(`Initiated multipart upload for ${fileName}.`);
 
     const etags = []; // Initializer array top store etags (part numbers)
@@ -151,6 +151,9 @@ const uploadFileMultiPart = async (readStream, fileName, fileType) => {
     // create read stream to the file at the given path.
     // Highwatermark controls the amount of data read at a time.
     const stream = fs.createReadStream(readStream.path, {highWaterMark:chunkSize});
+
+    //track progress
+    let uploadedBytes = 0;
 
     // Upload the file stream by chunks
     for await (const chunk of stream){
@@ -174,7 +177,13 @@ const uploadFileMultiPart = async (readStream, fileName, fileType) => {
         const eTag = uploadResponse.headers.get('Etag');
         etags.push({PartNumber: partNumber, ETag: eTag});
 
+        // report progress
+        uploadedBytes += chunk.length;
+        //const progress = ((uploadedBytes/fileSize)*100).toFixed(2);
+        //console.log(`${progress}%`)
+        trackUploadProgress(uploadedBytes, fileSize);
 
+        // success
         console.log(`Part ${partNumber} uploaded successfully.`);
         partNumber++; // iterate
     };
@@ -196,6 +205,37 @@ const uploadFileMultiPart = async (readStream, fileName, fileType) => {
     console.log(`${origName} uploaded successfully using multipart upload.`);
 }
 
+
+// tracks percent of file read
+let readProgress = 0;
+// tracks percent of file uploaded
+let uploadProgress = 0;
+
+// listen for readprogress event from trackReadProgress function
+progressEmitter.on('readProgress', (progress) => {
+    // update readProgress with emitted percentage
+    readProgress = parseFloat(progress);
+    // update overall progress
+    updateOverallProgress();
+});
+
+// takes in uploaded bytes and  total file size...
+const trackUploadProgress = (uploadedBytes, totalBytes) => {
+    // calulate percent progress
+    uploadProgress = ((uploadedBytes/totalBytes)*100).toFixed(2);
+    // emit uploadProgress
+    progressEmitter.emit('uploadProgress',uploadProgress);
+    // update overall progress
+    updateOverallProgress();
+};
+
+// calculates overall progress by taking the average of readProgress and uploadProgress
+const updateOverallProgress = () => {
+    const overallProgress = ((parseFloat(readProgress) + parseFloat(uploadProgress)) / 2).toFixed(2); //calculate
+    console.log(`Overall Progress: ${overallProgress}%`); // log progress
+    // update overall progress
+    progressEmitter.emit('overallProgress', overallProgress);
+};
 
 
 // export objects and functions
