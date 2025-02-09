@@ -238,12 +238,9 @@ app.post('/upload', upload.array('files'), async (req,res) => {
                         if (err) console.error(`Error deleting file ${file.originalname} from disk.`, err);
                         else console.log(`${file.originalname} deleted from disk.`);
                     });
-                }
+                };
                 return res.status(400).send(`Error: Zipped file ${zippedFileName} exceeds 2GB limit.`);
-            }
-
-            // create read stream to zip file
-            //const readStream = fs.createReadStream(zippedFilePath);
+            };
 
             // if file size is less than set size limit, upload file to s3 using normal upload
             if(zippedFileSize < multiThreshold){

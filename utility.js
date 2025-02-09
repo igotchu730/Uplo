@@ -45,16 +45,16 @@ function decryptData(encryptedData){
 async function insertFileUpload(id, ipAddress, fileName, pageLink, s3Link, fileSize) {
   try {  
       // Hash the sensitive fields
-      const hashedIpAddress = await encryptData(ipAddress);
-      const hashedFileName = await encryptData(fileName);
-      const hashedS3Link = await encryptData(s3Link);
-      const hashedPageLink = await encryptData(pageLink);
+      const encryptedIpAddress = await encryptData(ipAddress);
+      const encryptedFileName = await encryptData(fileName);
+      const encryptedS3Link = await encryptData(s3Link);
+      const encryptedPageLink = await encryptData(pageLink);
 
       // no encryption to test for mysql database, remove later
-      //const hashedIpAddress = ipAddress;
-      //const hashedFileName = fileName;
-      //const hashedS3Link = s3Link;
-      //const hashedPageLink = pageLink;
+      //const encryptedIpAddress = ipAddress;
+      //const encryptedFileName = fileName;
+      //const encryptedS3Link = s3Link;
+      //const encryptedPageLink = pageLink;
 
       // upload size
       const uploadSize = fileSize;
@@ -66,8 +66,8 @@ async function insertFileUpload(id, ipAddress, fileName, pageLink, s3Link, fileS
       const expirationTime = DateTime.now().setZone('America/Los_Angeles').plus({ hours: 24 }).toSQL({ includeOffset: false });
 
       // Insert the hashed data into the file_uploads table
-      const query = 'INSERT INTO file_uploads (id, ip_address, file_name, page_link, s3_link, file_size, expiration_date, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
-      const values = [id, hashedIpAddress, hashedFileName, hashedPageLink, hashedS3Link, uploadSize, expirationTime, currentTime];
+      const query = 'INSERT INTO file_uploads (id, ip_address, ip_hash, file_name, page_link, s3_link, file_size, expiration_date, created_at) VALUES (?, ?, SHA2(?, 256), ?, ?, ?, ?, ?, ?)';
+      const values = [id, encryptedIpAddress,ipAddress, encryptedFileName, encryptedPageLink, encryptedS3Link, uploadSize, expirationTime, currentTime];
 
       pool.query(query, values, (err, results) => {
           if (err) {
@@ -108,7 +108,7 @@ async function updateS3Link(id, data) {
                 console.error(`No matching id found: ${id}`);
                 return;
             }
-            console.log('S3 link updated successfully.');
+            //console.log('S3 link updated successfully.');
         });
     } catch (error) {
         console.error('Error in updateS3Link:', error);
@@ -148,7 +148,7 @@ async function retrieveFileUploadData(id, field) {
     return new Promise((resolve, reject) => {
 
         // Define allowed fields to prevent SQL injection
-        const allowedFields = ['ip_address', 'file_name', 'page_link', 's3_link', 'file_size', 'expiration_date', 'created_at'];
+        const allowedFields = ['ip_address', 'ip_hash', 'file_name', 'page_link', 's3_link', 'file_size', 'expiration_date', 'created_at'];
 
         // Validate the field input
         if (!allowedFields.includes(field)) {
@@ -175,18 +175,32 @@ async function retrieveFileUploadData(id, field) {
                 return reject(new Error(`No data found with id: ${id}`));
             }
             // success
-            console.log(`File upload data with id: ${id}, retrieved successfully.`);
+            // console.log(`File upload data with id: ${id}, retrieved successfully.`);
             // retrieve from the results array, the requested field
             resolve(results[0][field]);
         });
     }).then(data => { // 
         // return data
         //data = decryptData(data); //testing decryption
-        console.log(`${field} retrieved:`, data);
+        //console.log(`${field} retrieved:`, data);
         return data;
     });
 }
 
+async function checkIpCount(ipAddress) {
+    return new Promise((resolve, reject) => {
+        const query = 'SELECT COUNT(*) AS count FROM file_uploads WHERE ip_hash = SHA2(?, 256)';
+
+        pool.query(query, [ipAddress], (err, results) => {
+            if (err) {
+                console.error('Error checking IP count:', err);
+                return reject(err);
+            }
+            const count = results[0].count;
+            resolve(count);
+        });
+    }); 
+}
 
 // Function to create a randomized key for secure presigned urls
 const randomKey = () => {
@@ -289,7 +303,6 @@ const trackReadProgress = (filePath) => {
     readStream.on('data',(chunk) =>{
         totalBytesRead += chunk.length; // update how many bytes have been read
         const readProgress = ((totalBytesRead/fileSize)*100).toFixed(2); // calculate percentage
-        
         // update progress every 5%
         if(readProgress - lastLoggedProgress >= 5){
             //console.log(`Reading progress: ${readProgress}`);
@@ -311,6 +324,7 @@ const trackReadProgress = (filePath) => {
 }
 
 
+
 // export objects and functions
 module.exports = {
     randomKey,
@@ -325,5 +339,6 @@ module.exports = {
     updateS3Link,
     decryptData,
     progressEmitter,
-    trackReadProgress
+    trackReadProgress,
+    checkIpCount
 };

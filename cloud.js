@@ -1,3 +1,7 @@
+const axios = require('axios');
+const fs = require('fs'); // for file system interactions
+const fetch = require('node-fetch'); // for making http requests in nodejs
+
 // import objects and functions from other files
 const {
     randomKey,
@@ -65,14 +69,18 @@ const generatePresignedURLView = async(fileKey) => {
 
 // Upload functions
 
-const fs = require('fs'); // for file system interactions
-const fetch = require('node-fetch'); // for making http requests in nodejs
+
 const setPartSize = 64;
 const maxUploadSize = 2 * 1024 * 1024 * 1024; // 2GB limit
 
 // Upload function.
 // Takes in a readable stream for the file being uploaded, the file name, and file type
 const uploadFile = async (readStream, fileName, fileType) => {
+
+    // reset progress tracking
+    readProgress = 0;
+    uploadProgress = 0;
+
     const baseUrl = process.env.BASE_URL || 'http://localhost:3000'; // Fallback for development
 
     // Request presigned URL from the server
@@ -92,32 +100,37 @@ const uploadFile = async (readStream, fileName, fileType) => {
     const fileStats = fs.statSync(readStream.path);
     const fileSize = fileStats.size;
 
-    // Use the presigned URL to upload the file
-    const uploadResponse = await fetch(url, {
-        method: 'PUT',
+    // call trackReadProgress from utility to track read progress
+    const trackedReadStream = trackReadProgress(readStream.path);
+
+    // upload file using Axios with upload progress tracking
+    // use axios.put to upload file to s3 link
+    await axios.put(url, trackedReadStream, {
         headers: {
             'Content-Type': fileType || 'application/octet-stream', // Ensure MIME type is correct, defaults to generic type
-            'Content-Length': fileSize,
+            'Content-Length': fileSize
         },
-        body: readStream, // Pass the readable stream directly as the body
-        duplex: 'half', // Required for streaming body in Node.js fetch
+        // prevent axios from size limits
+        maxBodyLength: Infinity,
+        maxContentLength: Infinity,
+        //track progress using axios
+        onUploadProgress: (progressEvent) => {
+            trackUploadProgress(progressEvent.loaded, fileSize);
+        }
     });
-
-    // error handling
-    if (!uploadResponse.ok) {
-        const errorText = await uploadResponse.text();
-        console.error('Upload failed:', uploadResponse.status, errorText);
-        throw new Error(`Failed to upload file: ${uploadResponse.statusText}`);
-    }
 
     // success
     console.log(`${fileName} uploaded successfully`);
 };
 
-
 // Multipart upload function.
 // Takes in a readable stream for the file being uploaded, the file name, and file type
 const uploadFileMultiPart = async (readStream, fileName, fileType) => {
+
+    // reset progress tracking
+    readProgress = 0;
+    uploadProgress = 0;
+
     const baseUrl = process.env.BASE_URL || 'http://localhost:3000'; // Fallback for development
 
     // preserve original file name just in case
@@ -179,8 +192,6 @@ const uploadFileMultiPart = async (readStream, fileName, fileType) => {
 
         // report progress
         uploadedBytes += chunk.length;
-        //const progress = ((uploadedBytes/fileSize)*100).toFixed(2);
-        //console.log(`${progress}%`)
         trackUploadProgress(uploadedBytes, fileSize);
 
         // success
@@ -210,6 +221,8 @@ const uploadFileMultiPart = async (readStream, fileName, fileType) => {
 let readProgress = 0;
 // tracks percent of file uploaded
 let uploadProgress = 0;
+// tracks last logged for overall progress
+let lastLoggedOverallProgress = 0;
 
 // listen for readprogress event from trackReadProgress function
 progressEmitter.on('readProgress', (progress) => {
