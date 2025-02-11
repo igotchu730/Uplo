@@ -1,0 +1,58 @@
+/* Load box styling */
+#loadingBox {
+    border-radius: 20px;
+    background-color: #f2f2f2;
+    width: 400px; 
+    height: 400px; 
+    position: relative;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0px 50px 50px hsla(0, 0%, 0%, 0.300);
+}
+
+/* container for loader */
+#loader{
+    height:100%;
+    width: 100%;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* container for loading percentage and label */
+#loadPercent{
+    position: absolute;
+    font-size: 24px;
+    font-weight: bold;
+    color: #FA8072;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* loading label styling */
+#loadLabel{
+    font-size: 12px;
+    color: hsl(6, 93%, 78%);
+    margin-top: 3px;
+}
+
+/* loading circle styling */
+#loader::after{
+    content: "";
+    width: 150px;
+    height: 150px;
+    border: 15px solid #dddddd;
+    border-top-color: #FA8072;
+    border-radius: 50%;
+    animation: loading 0.75s ease infinite;
+}
+
+/* animation for loader */
+@keyframes loading {
+    from {transform: rotate(0turn)}
+    to {transform: rotate(1turn)}
+}

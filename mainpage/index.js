@@ -3,7 +3,8 @@ const fileInput = document.getElementById('uploadFile'); // The file(s) the user
 const stagingBox = document.getElementById('staging'); // The staging box after users choose files.
 const addMoreButton = document.getElementById('addMoreButton'); // button to add moore files
 const resetButton = document.getElementById('resetButton'); // button to reset file upload
-
+const loadingBox = document.getElementById('loadingBox'); // box for loading progress
+const submitButton = document.getElementById('submitButton'); // button for form submission
 
 
 //FOR TESTING: REMOVE LATER
@@ -17,17 +18,33 @@ const logFiles = () => {
 // When the page is loaded...
 document.addEventListener("DOMContentLoaded", function() {
     stagingBox.style.display = 'none'; // Hide the staging box
-    uploadBox.addEventListener("click", function() { // The upload box when clicked will open the file explorer.
+    // The upload box when clicked will open the file explorer.
+    uploadBox.addEventListener("click", function() {
         fileInput.click();
     });
     addMoreButton.addEventListener('click', function(){ // The addMoreButton when clicked will open the file explorer.
         fileInput.click();
+        updateFileInput(); // fixes issue with add more button not getting size limit alert
     })
-    resetButton.addEventListener('click', function(){ // The resetButton when clicked will clear all file inputs and return to upload box.
+    // The resetButton when clicked will clear all file inputs and return to upload box.
+    resetButton.addEventListener('click', function(){
         fileInput.value = '';
         fileList = [];
         uploadBox.style.display = 'flex';
         stagingBox.style.display = 'none';
+        loadingBox.style.display = 'none';
+    })
+    // The submit button when clicked will start the progress loading.
+    submitButton.addEventListener('click', function(){
+        // check if at least one file is selected and is under 2.00GB
+        if(totalFileSizeInBytes(fileList) < (2 * (1024 ** 3)) && totalFileSizeInBytes(fileList) > 0){
+            uploadBox.style.display = 'none';
+            stagingBox.style.display = 'none';
+            loadingBox.style.display = 'flex';
+        }else{ // prevent upload
+            event.preventDefault();
+            alert('No files selected.');
+        }
     })
 });
 
