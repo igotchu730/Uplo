@@ -9,6 +9,7 @@ const {
     trackReadProgress
 } = require('./utility');
 
+
 // import env
 require('dotenv').config();
 
@@ -66,9 +67,7 @@ const generatePresignedURLView = async(fileKey) => {
 };
 
 
-
 // Upload functions
-
 
 const setPartSize = 64;
 const maxUploadSize = 2 * 1024 * 1024 * 1024; // 2GB limit

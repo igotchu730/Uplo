@@ -84,7 +84,9 @@
             </form>
             <div id="loadingBox">
                 <div id="loader">
-                    <div id="loadPercent">0%<div id="loadLabel">Uploading files</div></div>
+                    <div id="spinner"></div>
+                    <div id="loadPercent">0%</div>
+                    <div id="loadLabel">Uploading files</div>
                 </div>
             </div>
         </div>
@@ -101,6 +103,7 @@
 
     </div>
     <!-- javascript file linked-->
+    <script src="/socket.io/socket.io.js"></script>
     <script src="index.js"></script>
 </body>
 </html>

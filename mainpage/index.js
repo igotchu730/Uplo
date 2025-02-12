@@ -4,8 +4,8 @@ const stagingBox = document.getElementById('staging'); // The staging box after 
 const addMoreButton = document.getElementById('addMoreButton'); // button to add moore files
 const resetButton = document.getElementById('resetButton'); // button to reset file upload
 const loadingBox = document.getElementById('loadingBox'); // box for loading progress
+const loadPercent = document.getElementById('loadPercent'); // loading progress percentage
 const submitButton = document.getElementById('submitButton'); // button for form submission
-
 
 //FOR TESTING: REMOVE LATER
 const logFiles = () => {
@@ -14,6 +14,14 @@ const logFiles = () => {
         console.log(`File ${i + 1}:`, fileInput.files[i]);
     }
 };
+
+// listen for pageshow which is when a page is loaded from cache mwhen user clicks back button
+window.addEventListener('pageshow', function(event) {
+    if(event.persisted){
+        // reload the page if its loaded from cache
+        window.location.reload();
+    };
+});
 
 // When the page is loaded...
 document.addEventListener("DOMContentLoaded", function() {
@@ -168,6 +176,7 @@ fileInput.addEventListener('change',function(){ //listen for changes in file inp
     //FOR TESTING: REMOVE LATER
 })
 
+
 // function to remove a file from the manual file list at a given index
 function removeFile(index){
     fileList.splice(index,1); // at the given index, remove element
@@ -235,3 +244,10 @@ function totalFileSizeInGB(files){
     totalSize = formatFileSizeInGB(totalSize);
     return totalSize;
 };
+
+// listen for socket event overallProgress, update load percent
+const socket = io();
+socket.on('overallProgress', (progress) => {
+    loadPercent.textContent = `${progress}%`;
+});
+

@@ -1,13 +1,19 @@
 const express = require('express');
+const http = require('http');
+const socketIo = require('socket.io');
 const router = express.Router();
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
-const fetch = require('node-fetch');
 const app = express();
+const server = http.createServer(app);
+const io = socketIo(server);
+
+
 // import env
 require('dotenv').config();
-const PORT = process.env.PORT;
+
+// import objects and functions from other files
 const {
   generatePresignedURL,
   uploadFile,
@@ -27,11 +33,19 @@ const {
   generateFileEmbed,
   updateS3Link,
   decryptData,
-  trackReadProgress
+  trackReadProgress,
+  progressEmitter,
 } = require('./utility');
 
+const PORT = process.env.PORT;
 const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
 const genericImg = `${baseUrl}/assets/testImg.png`;
+
+// listen for overallProgress events and use socket to emit progress to connected clients
+// basically redirecting the progress to the front end
+progressEmitter.on('overallProgress', (progress) => {
+    io.emit('overallProgress', progress);
+});
 
 // allow for reverse proxy
 app.set('trust proxy', true);
@@ -51,7 +65,7 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'mainpage', 'index.html'));
 });
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
 
