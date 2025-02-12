@@ -1,0 +1,52 @@
+/* General Styles */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #B0C4DE; /* Light blue background */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Header */
+#header {
+  background-color: #0B0B3B; /* Dark Blue */
+  width: 100%;
+  height: 60px;
+}
+
+/* Main Content Section */
+#main-body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 50px 0;
+}
+
+/* White Container for Terms Content */
+#terms-content {
+  background-color: white;
+  height: 70%;
+  width: 80%; /* Increased width */
+  max-width: 10000px; /* Adjusted max width */
+  padding: 60px; /* Increased padding for height */
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Alternating Section Colors */
+.section {
+  padding: 20px;
+  border-radius: 10px;
+  margin: 10px 0;
+}
+
+.white {
+  background-color: white;
+}
+
+.grey {
+  background-color: #F7F7F7; /* Light grey alternating sections */
+}
+
