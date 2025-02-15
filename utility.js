@@ -60,7 +60,7 @@ async function insertFileUpload(id, ipAddress, fileName, pageLink, s3Link, fileS
       const uploadSize = fileSize;
 
       // Time fields 
-      // Get current time in PST, and adjust format for mysql
+      // Get current time in UTC, and adjust format for mysql
       const currentTime = DateTime.now().setZone('America/Los_Angeles').toSQL({ includeOffset: false });
       // Expiration time (set to 24 hours later), and adjust format for mysql
       const expirationTime = DateTime.now().setZone('America/Los_Angeles').plus({ hours: 24 }).toSQL({ includeOffset: false });
@@ -259,10 +259,10 @@ function sanitizeFileName(title) {
 // function to generate correct html based on retrieved file type
 const generateFileEmbed = (fileExtension, url) => {
     if (['mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv'].includes(fileExtension)) {
-        return `<video controls width="600"><source src="${url}" type="video/${fileExtension}">Your browser does not support video.</video>`;
+        return `<video controls id="video"><source src="${url}" type="video/${fileExtension}">Your browser does not support video.</video>`;
     }
     if (['mp3', 'wav', 'ogg', 'flac', 'aac'].includes(fileExtension)) {
-        return `<audio controls><source src="${url}" type="audio/${fileExtension}">Your browser does not support audio.</audio>`;
+        return `<div id="audio"><audio controls id="audioControl"><source src="${url}" type="audio/${fileExtension}">Your browser does not support audio.</audio></div>`;
     }
     if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tiff', 'svg'].includes(fileExtension)) {
         return `<img src="${url}" alt="Image Preview" width="600"/>`;

@@ -54,6 +54,10 @@ app.set('trust proxy', true);
 app.use(express.static(path.join(__dirname, 'mainpage')));
 app.use('/assets',express.static(path.join(__dirname,'assets')));
 
+// serve files from public directory
+app.use(express.static(path.join(__dirname, '')));
+
+
 // Middleware
 app.use(express.json());
 
@@ -408,6 +412,14 @@ router.get('/file/:uniqueId', async (req,res) => {
         // retrieve file name from database using id
         const retrievedfileName = await retrieveFileUploadData(uniqueId,'file_name');
         const fileName = decryptData(retrievedfileName);
+
+        // retrieve share link from database using id
+        const retrievedShareLink = await retrieveFileUploadData(uniqueId,'page_link');
+        const shareLink = decryptData(retrievedShareLink);
+
+        // retrieve expiration date and time from database using id
+        const retrievedExpirationDate = await retrieveFileUploadData(uniqueId,'expiration_date');
+
         if (!fileName) {
             throw new Error(`No data found with id: ${uniqueId}`);
         }
@@ -444,7 +456,11 @@ router.get('/file/:uniqueId', async (req,res) => {
         res.send(`
             <html>
             <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <title>Uplo - View File</title>
+                <link rel="stylesheet" href="/styleSharePage.css">
+
                 <meta property="og:title" content="View File: ${fileName}" />
                 <meta property="og:description" content="Click to view or download this file." />
                 <meta property="og:type" content="${ogType}" />
@@ -460,27 +476,44 @@ router.get('/file/:uniqueId', async (req,res) => {
                 <meta name="theme-color" content="#FA8072" />
             </head>
             <body>
-                <h1>File: ${fileName}</h1>
-                <div>
-                    ${generateFileEmbed(fileExt,presignedUrl)}
+                <div id="header">
+                    <div id="logo">
+                        <!--<img src="logo.jpg" id="logo" alt="Logo"> -->
+                        ....LOGO
+                    </div>
+                    <div id="overallShare">
+                        <div id="shareLinkAndButton">
+                            <input type="text" value="${shareLink}" id="copyLink" readonly>
+                            <button onclick="copyText()" id="copyButton">
+                                <img class="iconClass" id="copyIcon" src="/assets/copyIcon.png">
+                            </button>
+                        </div>
+                        <div id="toolTip">Copy Link</div>
+                    </div>
+                    <div id="downloadContainer">
+                        <button id="downloadBtn" data-url="${presignedUrl}">
+                            <img class="iconClass" src="/assets/downloadIcon.png">
+                            <div id="downText">Download</div>
+                        </button>
+                    </div>
                 </div>
-                <button id="downloadBtn" data-url="${presignedUrl}">Download File</button>
-                <script>
-                    //listens for button click.
-                    document.getElementById('downloadBtn').addEventListener('click', function() {
+                <div id="main-body">
+                    <div id="embed">
+                        ${generateFileEmbed(fileExt,presignedUrl)}
+                    </div>
+                    <div id="infoBox">
+                        <div id="titleBox">
+                            <div id="fileLabel">File Name:</div>
+                            <input type="text" value="${fileName}" id="title" readonly>
+                        </div>
+                        <div id="expirBox">
+                            <div id="expirLabel">Expires:</div>
+                            <input type="text" value="${retrievedExpirationDate}" id="expirDate" readonly>
+                        </div>
+                    </div>
+                </div>
 
-                        //get stored presigned url
-                        const url = this.getAttribute('data-url');
-                        console.log("Download URL:", url);
-                        if (!url) {
-                            console.error("Error: No download URL found.");
-                            return;
-                        }
-
-                        // redirects browser to given url
-                        window.location.href = url;
-                    });
-                </script>
+                <script src="/indexSharePage.js"></script>
             </body>
             </html>
         `);
