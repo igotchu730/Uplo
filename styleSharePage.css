@@ -9,10 +9,22 @@ body {
     box-sizing: border-box;
     background-color: #f3e4e2;
 }
+
+/* styling for icons, highlighting, and input focus */
 .iconClass {
     width: 20px;
     height: 20px;
+} 
+::selection { /* highlighting for most browsers */
+    background-color: #aacae6;
+    color: #000;
 }
+::-moz-selection { /* highlighting for firefox */
+    background-color: #aacae6;
+    color: #000;
+} 
+
+
 
 /* Header styling */
 #header {
@@ -44,8 +56,15 @@ body {
     width: 100%;
     border-radius: 20px 0px 0px 20px;
     border: none;
-    padding-left: 10px;
+    padding-left: 15px;
     font-size: 14px;
+}
+/* styling for input focus */
+#copyLink:focus{
+    outline: 2px solid #FA8072;
+}
+#copyLink:focus + #copyButton{
+    outline: 2px solid #FA8072;
 }
 /* styling for share button */
 #copyButton {
@@ -90,8 +109,8 @@ body {
     font-size: 14px;
     background-color: #4948489c;
     color: white;
-    top: 65px;
-    right: 185px;
+    top: 67px;
+    right: 170px;
 }
 
 
@@ -163,18 +182,51 @@ body {
     width: 50%;
 }
 
-/* styling for audio */
+/* styling for audio container */
 #audio {
-    width: 100%;
-    padding: 100px;
+    width: 46%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background-color: #f3e4e2
+    overflow: hidden;
 }
+/* styling for audio player */
 #audioControl {
-    width: 75%;
+    width: 100%;
+    background-color: #f0f3f4;
+    filter: invert(1);
+}
+/* styling for audio screen container */
+#audioScreen {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+/* styling for audio background */
+#audioBG {
+    width: 100%;
+    border: none;
+    cursor: pointer;
+    transition: filter 0.3s ease-in-out;
+}
+/* for screen pausing etc */
+#audioScreen:hover #audioBG{
+    filter: brightness(50%) contrast(90%) blur(3px);
+}
+#audioScreen:hover #audioPausePlay{
+    opacity: 100;
+    visibility: visible;
+}
+#audioPausePLay {
+    width: 5%;
+    position: absolute;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
 }
 
 
@@ -234,7 +286,7 @@ body {
     height: 100%;
     border-radius: 5px 0px 0px 5px;
     color: white;
-    background-color: #aacae6;
+    background-color: #7daed8;
     display: flex;
     align-items: center;
     justify-content: center;

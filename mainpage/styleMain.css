@@ -26,7 +26,7 @@ body {
 /* Header styling */
 #header {
   background-color: #00002A;
-  height: 75px;
+  height: 85px;
   width: 100%;
   display: flex;
   flex-direction: row;

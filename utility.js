@@ -259,10 +259,22 @@ function sanitizeFileName(title) {
 // function to generate correct html based on retrieved file type
 const generateFileEmbed = (fileExtension, url) => {
     if (['mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv'].includes(fileExtension)) {
-        return `<video controls id="video"><source src="${url}" type="video/${fileExtension}">Your browser does not support video.</video>`;
+        return `<video controls id="video">
+                    <source src="${url}" type="video/${fileExtension}">
+                    Your browser does not support video.
+                </video>`;
     }
     if (['mp3', 'wav', 'ogg', 'flac', 'aac'].includes(fileExtension)) {
-        return `<div id="audio"><audio controls id="audioControl"><source src="${url}" type="audio/${fileExtension}">Your browser does not support audio.</audio></div>`;
+        return `<div id="audio">
+                    <div id="audioScreen">
+                        <img src="/assets/audioBG.png" id="audioBG"/>
+                        <img src="/assets/playIcon2.png" id="audioPausePlay"/>
+                    </div>
+                    <audio controls id="audioControl">
+                        <source src="${url}" type="audio/${fileExtension}">
+                        Your browser does not support audio.
+                    </audio>
+                </div>`;
     }
     if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tiff', 'svg'].includes(fileExtension)) {
         return `<img src="${url}" alt="Image Preview" width="600"/>`;
