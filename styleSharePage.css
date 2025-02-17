@@ -15,6 +15,12 @@ body {
     width: 20px;
     height: 20px;
 } 
+/* utility class for hidingmouse cursor */
+.hideMouse {
+    cursor: none;
+}
+
+
 ::selection { /* highlighting for most browsers */
     background-color: #aacae6;
     color: #000;
@@ -177,10 +183,36 @@ body {
 }
 
 
-/* styling for video */
+/* styling for video container */
 #video {
     width: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
 }
+/* styling for video player*/
+#videoPlayer {
+    width: 100%;
+}
+/* for screen pausing etc */
+#video:hover #videoPausePlay{
+    opacity: 100;
+    visibility: visible;
+}
+/* pause-play buttons */
+#videoPausePlay {
+    width: 5%;
+    position: absolute;
+    cursor: pointer;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+}
+
+
+
 
 /* styling for audio container */
 #audio {
@@ -209,7 +241,6 @@ body {
 #audioBG {
     width: 100%;
     border: none;
-    cursor: pointer;
     transition: filter 0.3s ease-in-out;
 }
 /* for screen pausing etc */
@@ -220,6 +251,7 @@ body {
     opacity: 100;
     visibility: visible;
 }
+/* pause-play buttons */
 #audioPausePLay {
     width: 5%;
     position: absolute;
