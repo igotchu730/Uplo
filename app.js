@@ -412,6 +412,7 @@ router.get('/file/:uniqueId', async (req,res) => {
         // retrieve file name from database using id
         const retrievedfileName = await retrieveFileUploadData(uniqueId,'file_name');
         const fileName = decryptData(retrievedfileName);
+        let cleanName = fileName.replace(/-.*\./, '.');
 
         // retrieve share link from database using id
         const retrievedShareLink = await retrieveFileUploadData(uniqueId,'page_link');
@@ -461,7 +462,7 @@ router.get('/file/:uniqueId', async (req,res) => {
                 <title>Uplo - View File</title>
                 <link rel="stylesheet" href="/styleSharePage.css">
 
-                <meta property="og:title" content="View File: ${fileName}" />
+                <meta property="og:title" content="View File: ${cleanName}" />
                 <meta property="og:description" content="Click to view or download this file." />
                 <meta property="og:type" content="${ogType}" />
                 <meta property="og:url" content="${baseUrl}/file/${uniqueId}" />
