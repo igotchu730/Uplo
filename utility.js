@@ -269,18 +269,22 @@ const generateFileEmbed = (fileExtension, url) => {
     }
     if (['mp3', 'wav', 'ogg', 'flac', 'aac'].includes(fileExtension)) {
         return `<div id="audio">
-                    <div id="audioScreen" draggable="false">
-                        <img src="/assets/audioBG2.png" id="audioBG" draggable="false"/>
-                        <img src="/assets/playIcon.png" id="audioPausePlay" draggable="false"/>
+                    <div id="totalAudio">
+                        <div id="audioScreen" draggable="false">
+                            <img src="/assets/audioBG2.png" id="audioBG" draggable="false"/>
+                            <img src="/assets/playIcon.png" id="audioPausePlay" draggable="false"/>
+                        </div>
+                        <audio controls id="audioControl">
+                            <source src="${url}" type="audio/${fileExtension}">
+                            Your browser does not support audio.
+                        </audio>
                     </div>
-                    <audio controls id="audioControl">
-                        <source src="${url}" type="audio/${fileExtension}">
-                        Your browser does not support audio.
-                    </audio>
                 </div>`;
     }
     if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tiff', 'svg'].includes(fileExtension)) {
-        return `<img src="${url}" alt="Image Preview" width="600"/>`;
+        return `<div id="image">
+                    <img src="${url}" alt="Image Preview" id="imageScreen"/>
+                </div>`;
     }
     if (['pdf'].includes(fileExtension)) {
         return `<iframe src="${url}" width="600" height="800"></iframe>`;

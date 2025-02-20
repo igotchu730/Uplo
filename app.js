@@ -159,7 +159,7 @@ app.post('/upload', upload.array('files'), async (req,res) => {
                 const downloadLink = 'https://testlink.com'
 
                 // create unique id for upload
-                const id = randomKey();
+                const id = `${randomKey()}${path.extname(fileName)}`;
 
                 // create page link
                 const pageLink = `${baseUrl}/file/${id}`;
@@ -501,16 +501,7 @@ router.get('/file/:uniqueId', async (req,res) => {
                     <div id="embed">
                         ${generateFileEmbed(fileExt,presignedUrl)}
                     </div>
-                    <div id="infoBox">
-                        <div id="titleBox">
-                            <div id="fileLabel">File Name:</div>
-                            <input type="text" value="${fileName}" id="title" readonly>
-                        </div>
-                        <div id="expirBox">
-                            <div id="expirLabel">Expires:</div>
-                            <input type="text" value="${retrievedExpirationDate}" id="expirDate" readonly>
-                        </div>
-                    </div>
+                    <div id="infoBox"></div>
                 </div>
 
                 <script src="/indexSharePage.js"></script>

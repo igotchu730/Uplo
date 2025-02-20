@@ -8,6 +8,10 @@ const audioBG = document.getElementById('audioBG');
 const audioControl = document.getElementById('audioControl');
 const audioPausePlay = document.getElementById('audioPausePlay');
 const audioScreen = document.getElementById('audioScreen');
+const image = document.getElementById('image');
+const imageScreen = document.getElementById('imageScreen');
+
+
 
 // when document is loaded, setup the correct element
 document.addEventListener("DOMContentLoaded", () => {
@@ -16,6 +20,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     else if(audio){
         setupAudioControls();
+    }
+    else if(image){
+        setupImageControls()
     }
 });
 
@@ -105,7 +112,7 @@ function setupVideoControls() {
     });
 
     // when cursor is on screen, show button. if not, dont show.
-    const videoElements = [videoPlayer, videoPausePlay]
+    const videoElements = [video]
     videoElements.forEach(element => {
         element.addEventListener('mouseenter', function(){
             videoPausePlay.style.opacity = '1';
@@ -124,35 +131,25 @@ function setupVideoControls() {
         clearTimeout(timeoutVideo);
         timeoutVideo = setTimeout(() => {
             if(!videoPlayer.paused){
-                videoPausePlay.style.display = 'none';
+                videoPausePlay.style.opacity = '0';
                 videoPlayer.classList.add('hideMouse');
             }
         }, 2500);
     };
 
     // if cursor is moving, reset timer, show cursor and button, set timer again
-    videoPlayer.addEventListener('mousemove', () => {
+    video.addEventListener('mousemove', () => {
         clearTimeout(timeoutVideo);
         videoPlayer.classList.remove('hideMouse');
-        videoPausePlay.style.display = 'flex';
+        videoPausePlay.style.opacity = '1';
         startHideTimeoutVideo();
     });
      // if cursor off video, reset timer, reset class.
-    videoPlayer.addEventListener('mouseleave', () => {
-        // temporary boolean
-        let ifHover = false;
-        // if mouse is not hovering over pause/play button, set true 
-        // (solves issue of system thinking pause/play button is outside video)
-        videoPausePlay.addEventListener('mouseover', function(){
-            ifHover = true;
-        });
-        // if not hovering over button, reset timer reset class
-        if(!ifHover){
-            clearTimeout(timeoutVideo);
-            videoPlayer.classList.remove('hideMouse');
-        }
+    video.addEventListener('mouseleave', () => {
+        clearTimeout(timeoutVideo);
+        videoPlayer.classList.remove('hideMouse');
     });
-}
+};
 
   
 
@@ -189,6 +186,26 @@ function setupAudioControls() {
             audioPausePlay.style.opacity = '0';
         }
     });
+    audioControl.addEventListener('mouseenter', function(){
+        startHideTimeoutAudio();
+    });
+    audioControl.addEventListener('mousemove', function(){
+        clearTimeout(timeoutAudio);
+        audioScreen.classList.remove('hideMouse');
+        audioBG.style.filter = 'brightness(50%) contrast(90%) blur(3px)';
+        audioPausePlay.style.opacity = '1';
+        startHideTimeoutAudio();
+    });
+    audioControl.addEventListener('mouseleave', function(){
+        clearTimeout(timeoutAudio);
+        // if not paused
+        if(!audioControl.paused){
+            audioScreen.classList.remove('hideMouse');
+            audioBG.style.filter = 'none';
+            audioPausePlay.style.opacity = '0';
+        }
+    });
+
 
     // when audio is playing or paused, change the button accordingly
     audioControl.addEventListener('play',function(){
@@ -223,4 +240,14 @@ function setupAudioControls() {
             }
         }, 3000);
     };
+};
+
+
+
+
+/*
+-----IMAGES-----
+*/
+function setupImageControls() {
+
 };
