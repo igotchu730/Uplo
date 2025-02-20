@@ -445,13 +445,13 @@ router.get('/file/:uniqueId', async (req,res) => {
             ogImage = presignedUrl;
         // for videos, try to embed
         } else if (['mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv'].includes(fileExt)) {
+            shareLink = `${baseUrl}/video/${fileName}`;
             ogType = "video";
             ogMediaTags = `
-                <meta property="og:video" content="${presignedUrl}" />
-                <meta property="og:video:secure_url" content="${presignedUrl}" />
+                <meta property="og:video" content="${shareLink}" />
+                <meta property="og:video:secure_url" content="${shareLink}" />
                 <meta property="og:video:type" content="video/mp4" />
             `;
-            shareLink = `${baseUrl}/video/${fileName}`;
         }
 
         //html for new page
