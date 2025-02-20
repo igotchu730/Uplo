@@ -517,19 +517,18 @@ router.get('/file/:uniqueId', async (req,res) => {
 });
 
 
-app.get("/video/:key", async (req,res) => {
-    try{
-        const {key} = req.params;
-         // Generate a presigned URL
-        const url = s3.getSignedUrl("getObject", {
-            Bucket: process.env.S3_BUCKET_NAME,
-            Key: key,
-            Expires: 86400,
-            ResponseContentType: "video/mp4",
-        });
-        res.redirect(url); // redirect user to the presigned URL
-    }catch(error){
-        console.error("Error generating presigned URL:", error);
-        res.status(500).send("Error generating video link");
+app.get("/video/:key", async (req, res) => {
+    try {
+        const { key } = req.params;
+
+        // Fetch the file from S3 and pipe it to the response
+        const stream = s3.getObject({ Bucket: process.env.S3_BUCKET_NAME, Key: key }).createReadStream();
+
+        res.setHeader("Content-Type", "video/mp4");
+        stream.pipe(res);
+    } catch (error) {
+        console.error("Error streaming video:", error);
+        res.status(500).send("Error streaming video");
     }
 });
+
