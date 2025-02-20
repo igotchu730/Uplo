@@ -54,7 +54,7 @@ const generatePresignedURLView = async(fileKey) => {
         Bucket: process.env.S3_BUCKET_NAME, //s3 bucket name
         Key: fileKey, // name of file
         Expires: 86400, // expiration time of URL after generation (24hrs)
-        //ResponseContentDisposition: `attachment; filename="${fileKey}"`, // force download when s3 link is visted
+        ResponseContentDisposition: `attachment; filename="${fileKey}"`, // force download when s3 link is visted
     }
     try {
         const url = await s3.getSignedUrlPromise('getObject', params);

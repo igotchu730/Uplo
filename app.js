@@ -416,7 +416,7 @@ router.get('/file/:uniqueId', async (req,res) => {
 
         // retrieve share link from database using id
         const retrievedShareLink = await retrieveFileUploadData(uniqueId,'page_link');
-        const shareLink = decryptData(retrievedShareLink);
+        let shareLink = decryptData(retrievedShareLink);
 
         // retrieve expiration date and time from database using id
         const retrievedExpirationDate = await retrieveFileUploadData(uniqueId,'expiration_date');
@@ -451,6 +451,7 @@ router.get('/file/:uniqueId', async (req,res) => {
                 <meta property="og:video:secure_url" content="${presignedUrl}" />
                 <meta property="og:video:type" content="video/mp4" />
             `;
+            shareLink = `${baseUrl}/video/${fileName}`;
         }
 
         //html for new page
@@ -512,5 +513,23 @@ router.get('/file/:uniqueId', async (req,res) => {
     } catch(error){ //error handling
         console.error('Error retrieving data:', error);
         res.status(500).send(`Error retrieving file information: ${error.message}`);
+    }
+});
+
+
+app.get("/video/:key", async (req,res) => {
+    try{
+        const {key} = req.params;
+         // Generate a presigned URL
+        const url = s3.getSignedUrl("getObject", {
+            Bucket: process.env.S3_BUCKET_NAME,
+            Key: key,
+            Expires: 86400,
+            ResponseContentType: "video/mp4",
+        });
+        res.redirect(url); // redirect user to the presigned URL
+    }catch(error){
+        console.error("Error generating presigned URL:", error);
+        res.status(500).send("Error generating video link");
     }
 });
