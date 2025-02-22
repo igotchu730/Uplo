@@ -517,7 +517,7 @@ router.get('/file/:uniqueId', async (req,res) => {
 });
 
 
-app.get("/video-stream/:key", async (req, res) => {
+app.get("/video/:key", async (req, res) => {
     try {
         const { key } = req.params;
 
@@ -532,36 +532,3 @@ app.get("/video-stream/:key", async (req, res) => {
     }
 });
 
-app.get("/video/:key", async (req, res) => {
-    try {
-        const { key } = req.params;
-        const videoUrl = `${baseUrl}/video-stream/${key}`; // Change to your domain
-
-        res.setHeader("Content-Type", "text/html");
-        res.send(`
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <meta property="og:title" content="Uplo">
-                <meta property="og:description" content="A short description of your video">
-                <meta property="og:video" content="${videoUrl}">
-                <meta property="og:video:type" content="video/mp4">
-                <meta property="og:url" content="${baseUrl}/video/${key}">
-                <meta property="og:site_name" content="Uplo File Sharing" />
-                <title>Video</title>
-            </head>
-            <body>
-                <video controls width="100%" autoplay>
-                    <source src="${videoUrl}" type="video/mp4">
-                    Your browser does not support the video tag.
-                </video>
-            </body>
-            </html>
-        `);
-    } catch (error) {
-        console.error("Error generating video page:", error);
-        res.status(500).send("Error loading video");
-    }
-});
