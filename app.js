@@ -516,19 +516,68 @@ router.get('/file/:uniqueId', async (req,res) => {
     }
 });
 
-
+// streams videos from s3, allow seekiong
 app.get("/video/:key", async (req, res) => {
     try {
+        // get file name 
         const { key } = req.params;
+        // get the range header
+        const range = req.headers.range;
 
-        // Fetch the file from S3 and pipe it to the response
-        const stream = s3.getObject({ Bucket: process.env.S3_BUCKET_NAME, Key: key }).createReadStream();
+        // bucket and file name
+        const headParams = {
+            Bucket: process.env.S3_BUCKET_NAME,
+            Key: key,
+        };
 
-        res.setHeader("Content-Type", "video/mp4");
+        // get the file metadata to determine size
+        const headObject = await s3.headObject(headParams).promise();
+        const fileSize = headObject.ContentLength;
+
+        // if range header is not present, serve enitre video
+        if (!range) {
+            const streamParams = {
+                Bucket: process.env.S3_BUCKET_NAME,
+                Key: key,
+            };
+            const stream = s3.getObject(streamParams).createReadStream();
+            res.writeHead(200, {
+                "Content-Length": fileSize,
+                "Content-Type": "video/mp4",
+            });
+            return stream.pipe(res);
+        }
+
+        // if range header exists, handle partial requests
+        const parts = range.replace(/bytes=/, "").split("-");
+        const start = parseInt(parts[0], 10);
+        const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+        // invalid range
+        if (start >= fileSize || end >= fileSize) {
+            return res.status(416).send("Requested range not satisfiable");
+        }
+        // stream only request portion
+        const streamParams = {
+            Bucket: process.env.S3_BUCKET_NAME,
+            Key: key,
+            Range: `bytes=${start}-${end}`,
+        };
+        const stream = s3.getObject(streamParams).createReadStream();
+
+        // handle range requests, allow partial content delivery
+        res.writeHead(206, {
+            "Content-Range": `bytes ${start}-${end}/${fileSize}`,
+            "Accept-Ranges": "bytes",
+            "Content-Length": end - start + 1,
+            "Content-Type": "video/mp4",
+        });
         stream.pipe(res);
+
+    // error handling
     } catch (error) {
         console.error("Error streaming video:", error);
         res.status(500).send("Error streaming video");
     }
 });
+
 
