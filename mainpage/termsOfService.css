@@ -17,10 +17,11 @@ body {
   padding: 50px 0;
 }
 
+
 /* White Container for Terms Content */
 #terms-content {
   background-color: white;
-  height: 80vh; /* Adjust height as needed */
+  height: 75vh; /* Adjust height as needed */
   width: 100%;
   max-width: 1300px;
   padding: 40px;
@@ -29,7 +30,7 @@ body {
 
   overflow-y: auto; /* Enables scrolling */
   max-height: 80vh; /* Allows scrolling inside */  
-  margin-bottom: 200px; /* Creates space between the container and the footer */
+  margin-bottom: 20px; /* Creates space between the container and the footer */
 }
 
 /* Alternating Section Colors */
