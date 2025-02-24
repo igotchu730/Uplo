@@ -312,6 +312,74 @@ body {
 
 
 
+/* styling for pdf container */
+#pdf {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 100%;
+    max-height: 100%;
+    overflow: hidden; /* prevent oversized pdf */
+}
+/* styling for pdf */
+#pdfScreen {
+    width: 100vw; /* pdf cannot exceed 100% of the vw */
+    height: 85vh; /* pdf cannot exceed 85% of the vh */
+    display: block;
+    object-fit: contain; /* prevent cropping */
+    border: none;
+}
+
+
+
+
+/* styling for text container */
+#text {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 100%;
+    max-height: 100%;
+    overflow: hidden;
+}
+/* styling for text */
+#textScreen {
+    max-width: 90vw; /* text cannot exceed 90% of the vw */
+    max-height: 80vh; /* text cannot exceed 80% of the vh */
+    width: auto; /* keep aspect ratio */
+    height: auto; /* keep aspect ratio */
+    display: block;
+    object-fit: contain; /* prevent cropping */
+    background-color: white;
+    overflow: auto;
+    padding: 20px;
+    white-space: pre;
+}
+
+
+
+
+/* styling for doc container */
+#office {
+    display: block;
+    align-items: center;
+    justify-content: center;
+    max-width: 100%;
+    max-height: 100%;
+    overflow: hidden; /* prevent oversized doc */
+}
+/* styling for doc */
+#officeScreen {
+    width: 100vw; /* pdf cannot exceed 100% of the vw */
+    height: 85vh; /* pdf cannot exceed 85% of the vh */
+    display: block;
+    object-fit: contain; /* prevent cropping */
+    border: none;
+}
+
+
+
+
 
 /* container for title and expiration */
 #infoBox {

@@ -22,6 +22,7 @@ const {
   setPartSize,
   maxUploadSize,
   generatePresignedURLView,
+  generatePresignedURLViewNoDownload,
 } = require('./cloud');
 const {
   zipper,
@@ -426,8 +427,16 @@ router.get('/file/:uniqueId', async (req,res) => {
         }
         // determine file type by extracting ext
         const fileExt = fileName.split('.').pop().toLowerCase();
+
         // generate presigned url
         const presignedUrl = await generatePresignedURLView(fileName);
+        // create a seperate variable to contain the presigned url to use
+        let presignedUrlToUse= presignedUrl;
+        // generate presigned url without forcing download for pdf preview, assign to urltouse
+        if(fileExt === 'pdf'){
+            presignedUrlToUse = await generatePresignedURLViewNoDownload(fileName);
+        }
+
         //update s3 link
         updateS3Link(uniqueId,presignedUrl);
 
@@ -501,7 +510,7 @@ router.get('/file/:uniqueId', async (req,res) => {
                 </div>
                 <div id="main-body">
                     <div id="embed">
-                        ${generateFileEmbed(fileExt,presignedUrl)}
+                        ${generateFileEmbed(fileExt,presignedUrlToUse)}
                     </div>
                     <div id="infoBox"></div>
                 </div>
@@ -548,7 +557,7 @@ app.get("/video/:key", async (req, res) => {
             return stream.pipe(res);
         }
 
-        // if range header exists, handle partial requests
+        // if range header exists, extract bytes from header and convert to int
         const parts = range.replace(/bytes=/, "").split("-");
         const start = parseInt(parts[0], 10);
         const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;

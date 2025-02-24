@@ -287,20 +287,25 @@ const generateFileEmbed = (fileExtension, url) => {
                 </div>`;
     }
     if (['pdf'].includes(fileExtension)) {
-        return `<iframe src="${url}" width="600" height="800"></iframe>`;
+        return `<div id="pdf">
+                    <iframe id="pdfScreen" src="${url}"></iframe>
+                </div>`;
     }
     if (['txt', 'md'].includes(fileExtension)) {
-        return `<pre style="width: 600px; overflow: auto; border: 1px solid #ddd; padding: 10px;"><code>Fetching file...</code></pre>
+        return `<div id="text">
+                    <div id="textScreen"><code>Fetching file...</code></div>
+                </div>
                 <script>
                     fetch("${url}")
                         .then(response => response.text())
-                        .then(text => document.querySelector("pre code").textContent = text)
+                        .then(text => document.querySelector("div code").textContent = text)
                         .catch(err => console.error("Error loading file:", err));
                 </script>`;
     }
     if (['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(fileExtension)) {
-        return `<iframe src="https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(url)}" width="600" height="800"></iframe>
-                <p><a href="${url}" target="_blank">Open in Microsoft Office</a></p>`;
+        return `<div id="office">
+                    <iframe id="officeScreen" src="https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(url)}"></iframe>
+                </div>`;
     }
     if (['zip', 'rar', '7z', 'tar', 'gz'].includes(fileExtension)) {
         return `<p>Compressed file detected. <a href="${url}" download>Download File</a></p>`;
