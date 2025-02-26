@@ -210,7 +210,7 @@ app.post('/upload', upload.array('files'), async (req,res) => {
 
             // if user title is empty, use a default name
             if (!title || title.trim() === '') {
-                title = 'zipped-files';
+                title = 'zipped_files';
             };
 
             const sanitizedFileName = sanitizeFileName(title); // sanitize name
@@ -236,7 +236,7 @@ app.post('/upload', upload.array('files'), async (req,res) => {
             const downloadLink = 'https://testlink.com'
 
             // create unique id for upload
-            const id = randomKey();
+            const id = `${randomKey()}${path.extname(zippedFileName)}`;
 
             // create page link
             const pageLink = `${baseUrl}/file/${id}`;
@@ -413,7 +413,8 @@ router.get('/file/:uniqueId', async (req,res) => {
         // retrieve file name from database using id
         const retrievedfileName = await retrieveFileUploadData(uniqueId,'file_name');
         const fileName = decryptData(retrievedfileName);
-        let cleanName = fileName.replace(/-.*\./, '.');
+        let cleanName = fileName.replace(/-(?!.*-).*?\./, '.');
+
 
         // retrieve share link from database using id
         const retrievedShareLink = await retrieveFileUploadData(uniqueId,'page_link');
@@ -510,7 +511,7 @@ router.get('/file/:uniqueId', async (req,res) => {
                 </div>
                 <div id="main-body">
                     <div id="embed">
-                        ${generateFileEmbed(fileExt,presignedUrlToUse)}
+                        ${generateFileEmbed(fileExt,presignedUrlToUse,cleanName)}
                     </div>
                     <div id="infoBox"></div>
                 </div>

@@ -10,6 +10,12 @@ const audioPausePlay = document.getElementById('audioPausePlay');
 const audioScreen = document.getElementById('audioScreen');
 const image = document.getElementById('image');
 const imageScreen = document.getElementById('imageScreen');
+const pdf = document.getElementById('pdf');
+const text = document.getElementById('text');
+const office = document.getElementById('office');
+const zip = document.getElementById('zip');
+const zipLabel = document.getElementById('zipLabel');
+
 
 
 
@@ -22,7 +28,19 @@ document.addEventListener("DOMContentLoaded", () => {
         setupAudioControls();
     }
     else if(image){
-        setupImageControls()
+        setupImageControls();
+    }
+    else if(pdf){
+        setupPDFControls();
+    }
+    else if(text){
+        setupTXTControls();
+    }
+    else if(office){
+        setupOfficeControls();
+    }
+    else if(zip){
+        setupZipControls();
     }
 });
 
@@ -249,5 +267,32 @@ function setupAudioControls() {
 -----IMAGES-----
 */
 function setupImageControls() {
+
+};
+
+/*
+-----PDF-----
+*/
+function setupPDFControls() {
+
+};
+
+/*
+-----TEXT-----
+*/
+function setupTXTControls() {
+
+};
+
+/*
+-----OFFICE-----
+*/
+function setupOfficeControls() {
+
+};
+/*
+-----ZIP-----
+*/
+function setupZipControls() {
 
 };

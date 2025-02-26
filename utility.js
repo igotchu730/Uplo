@@ -50,12 +50,6 @@ async function insertFileUpload(id, ipAddress, fileName, pageLink, s3Link, fileS
       const encryptedS3Link = await encryptData(s3Link);
       const encryptedPageLink = await encryptData(pageLink);
 
-      // no encryption to test for mysql database, remove later
-      //const encryptedIpAddress = ipAddress;
-      //const encryptedFileName = fileName;
-      //const encryptedS3Link = s3Link;
-      //const encryptedPageLink = pageLink;
-
       // upload size
       const uploadSize = fileSize;
 
@@ -257,7 +251,7 @@ function sanitizeFileName(title) {
 }
 
 // function to generate correct html based on retrieved file type
-const generateFileEmbed = (fileExtension, url) => {
+const generateFileEmbed = (fileExtension, url, fileName) => {
     if (['mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv'].includes(fileExtension)) {
         return `<div id="video">
                     <video controls id="videoPlayer">
@@ -308,9 +302,15 @@ const generateFileEmbed = (fileExtension, url) => {
                 </div>`;
     }
     if (['zip', 'rar', '7z', 'tar', 'gz'].includes(fileExtension)) {
-        return `<p>Compressed file detected. <a href="${url}" download>Download File</a></p>`;
+        return `<div id="zip">
+                    <img src="/assets/zipBG.png" id="zipBG" draggable="false"/>
+                    <p id="zipLabel">${fileName}</p>
+                </div>`;
     }
-    return `<p>File preview is not available. <a href="${url}" download>Download File</a></p>`;
+    return `<div id="unknown">
+                <img src="/assets/unknownBG.png" id="unknownBG" draggable="false"/>
+                <p id="unknownLabel">${fileName}</p>
+            </div>`;
 };
 
 

@@ -380,6 +380,80 @@ body {
 
 
 
+/* styling for zip container */
+#zip {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    max-width: 100%;
+    max-height: 100%;
+    overflow: hidden; /* prevent oversized images */
+}
+/* styling for zip background */
+#zipBG {
+    max-width: 90vw; /* image cannot exceed 90% of the vw */
+    max-height: 75vh; /* image cannot exceed 75% of the vh */
+    width: auto; /* keep aspect ratio */
+    height: auto; /* keep aspect ratio */
+    display: block;
+    object-fit: contain; /* prevent cropping */
+}
+/* styling for zip label */
+#zipLabel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #555555;
+    width: 100%;
+    margin: 0px;
+    padding: 15px;
+    color: white;
+    font-size: 24px;
+    overflow: hidden;
+}
+
+
+
+
+/* styling for unknown container */
+#unknown {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    max-width: 100%;
+    max-height: 100%;
+    overflow: hidden; /* prevent oversized images */
+}
+/* styling for unknown background */
+#unknownBG {
+    max-width: 90vw; /* image cannot exceed 90% of the vw */
+    max-height: 75vh; /* image cannot exceed 75% of the vh */
+    width: auto; /* keep aspect ratio */
+    height: auto; /* keep aspect ratio */
+    display: block;
+    object-fit: contain; /* prevent cropping */
+}
+/* styling for unknown label */
+#unknownLabel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #555555;
+    width: 100%;
+    margin: 0px;
+    padding: 15px;
+    color: white;
+    font-size: 24px;
+    overflow: hidden;
+}
+
+
+
+
 
 /* container for title and expiration */
 #infoBox {
