@@ -25,7 +25,6 @@ body {
   max-width: 1300px;
   padding: 40px;
   border-radius: 15px;
-  border: 10px solid #f3a69d;
 
   overflow-y: auto; /* Enables scrolling */
   max-height: 80vh; /* Allows scrolling inside */  

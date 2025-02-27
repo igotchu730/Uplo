@@ -25,11 +25,10 @@ body {
   max-width: 1300px;
   padding: 40px;
   border-radius: 15px;
-  border: 10px solid #f3a69d;
 
   overflow-y: auto; /* Enables scrolling */
   max-height: 80vh; /* Allows scrolling inside */  
-  margin-bottom: 20px; /* Creates space between the container and the footer */
+  margin-bottom: 25px; /* Creates space between the container and the footer */
 }
 
 /* Alternating Section Colors */

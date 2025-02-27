@@ -17,6 +17,33 @@ body {
   padding: 50px 0;
 }
 
+/* Header Styling */
+#main-body h1 {
+  font-size: 3.5rem;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+/* Paragraph Styling */
+#main-body p {
+  font-size: 2.2rem;
+  line-height: 2.2;
+  color: #555;
+  margin-bottom: 15px;
+}
+
+/* Content Box */
+.content-box {
+  padding: 20px;
+}
+
+  #main-body h1 {
+      font-size: 3rem;
+  }
+
+  #main-body p {
+      font-size: 1.5rem;
+  }
 
 /* White Container for Terms Content */
 #terms-content {
@@ -27,24 +54,6 @@ body {
   padding: 40px;
   border-radius: 15px;
 
-  overflow-y: auto; /* Enables scrolling */
   max-height: 80vh; /* Allows scrolling inside */  
-  margin-bottom: 20px; /* Creates space between the container and the footer */
+  margin-bottom: 10px; /* Creates space between the container and the footer */
 }
-
-/* Alternating Section Colors */
-.section {
-  padding: 20px;
-  border-radius: 10px;
-  margin: 10px 0;
-}
-
-.white {
-  background-color: white;
-}
-
-.grey {
-  background-color: #F7F7F7; /* Light grey alternating sections */
-}
-
-
