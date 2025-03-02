@@ -15,6 +15,7 @@ const text = document.getElementById('text');
 const office = document.getElementById('office');
 const zip = document.getElementById('zip');
 const zipLabel = document.getElementById('zipLabel');
+const unknown = document.getElementById('unknown');
 
 
 
@@ -41,6 +42,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     else if(zip){
         setupZipControls();
+    }
+    else if(zip){
+        setupUnknownControls();
     }
 });
 
@@ -294,5 +298,11 @@ function setupOfficeControls() {
 -----ZIP-----
 */
 function setupZipControls() {
+
+};
+/*
+-----UNKNOWN-----
+*/
+function setupUnknownControls() {
 
 };

@@ -8,6 +8,7 @@ body {
     height: 100%; /* custom full height, controls scrolling area */
     box-sizing: border-box;
     background-color: #f3e4e2;
+    min-width: 300px;
 }
 
 /* styling for icons, highlighting, and input focus */

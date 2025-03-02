@@ -36,6 +36,7 @@ const {
   decryptData,
   trackReadProgress,
   progressEmitter,
+  checkIpCount,
 } = require('./utility');
 
 const PORT = process.env.PORT;
@@ -107,7 +108,33 @@ const upload = multer({storage});
 // http post endppint
 app.post('/upload', upload.array('files'), async (req,res) => {
 
-    // retrieve user inputed title for uploade
+    // retrieve user ip and check if they have surpassed daily limit
+    const userIp = getClientIp(req);
+    const IPCount = await checkIpCount(userIp);
+    console.log('IP Count: ', IPCount);
+    if(IPCount >= 3){
+        if (req.files) { //delete file before returning
+            req.files.forEach(file => {
+                const filePath = path.join(__dirname, 'uploads', file.filename);
+                fs.unlink(filePath, (err) => {
+                    if (err) console.error(`Error deleting file ${file.filename}:`, err);
+                    else console.log(`Deleted file ${file.filename} due to upload limit.`);
+                });
+            });
+        } //return user to home page and send alert 
+        return res.status(400).send(`
+            <html>
+                <body>
+                    <script>
+                        alert("Daily use limit of 3 uploads per user.");
+                        window.history.back();
+                    </script>
+                </body>
+            </html>
+        `);
+    };
+
+    // retrieve user inputed title for upload
     let title = req.body.uploadTitle;
     //console.log('Uploaded Title:', title);
 
@@ -155,8 +182,6 @@ app.post('/upload', upload.array('files'), async (req,res) => {
                     title = `${sanitizedFileName}-${randomKey()}${fileExt}` // combine to make new title, ext includes '.'. Also added random Key
                 }
 
-                // get user IP and downloadlink
-                const userIp = getClientIp(req);
                 const downloadLink = 'https://testlink.com'
 
                 // create unique id for upload
@@ -230,9 +255,6 @@ app.post('/upload', upload.array('files'), async (req,res) => {
             const zippedFileStats = fs.statSync(zippedFilePath);
             const zippedFileSize = zippedFileStats.size;
 
-            // get user IP and downloadlink
-            const userIp = getClientIp(req);
-            //console.log('User IP Address:', userIp);
             const downloadLink = 'https://testlink.com'
 
             // create unique id for upload
