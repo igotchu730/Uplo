@@ -126,7 +126,7 @@ app.post('/upload', upload.array('files'), async (req,res) => {
             <html>
                 <body>
                     <script>
-                        alert("Daily use limit of 3 uploads per user.");
+                        alert("Daily limit of 3 uploads per user.");
                         window.history.back();
                     </script>
                 </body>
