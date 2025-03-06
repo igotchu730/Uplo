@@ -3,8 +3,8 @@ const{
     decryptData
 } = require('./utility');
 
-const id = '55e91354f62885b1522431939f088637.jpg';
-const field = 's3_link';
+const id = '7d403af33ddd8555eb524a2beb3f7c3b.mp4';
+const field = 'file_name';
 
 (async () => {
     try {

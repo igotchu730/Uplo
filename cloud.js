@@ -1,12 +1,20 @@
 const axios = require('axios');
 const fs = require('fs'); // for file system interactions
 const fetch = require('node-fetch'); // for making http requests in nodejs
+const cron = require('node-cron'); // for automatically running code from server
+
+//database pool
+const {
+    poolPromise
+} = require('./database');
+
 
 // import objects and functions from other files
 const {
     randomKey,
     progressEmitter,
-    trackReadProgress
+    trackReadProgress,
+    decryptData
 } = require('./utility');
 
 
@@ -265,6 +273,69 @@ const updateOverallProgress = () => {
     // update overall progress
     progressEmitter.emit('overallProgress', overallProgress);
 };
+
+
+// function to delete file directly from S3
+async function deleteFileFromS3(fileKey) {
+
+    const params = {
+        Bucket: process.env.S3_BUCKET_NAME,
+        Key: fileKey
+    };
+
+    try {
+        await s3.deleteObject(params).promise();
+        console.log(`Deleted from S3: ${fileKey}`);
+        return true;
+    } catch (err) {
+        console.error(`Failed to delete from S3: ${fileKey}`, err);
+        return false;
+    }
+}
+
+// function to find expired files and delete them
+async function deleteExpiredFiles(){
+    if (!poolPromise) {
+        console.error("Database pool is not initialized.");
+        return;
+    }
+    const connection = await poolPromise.getConnection();
+    try{
+        
+        // find expired files in mysql database
+        const [rows] = await connection.execute(`
+            SELECT id, file_name FROM file_uploads WHERE expiration_date < NOW()
+        `);
+        if(rows.length === 0){
+            console.log('No expired files found for deletion.')
+            return;
+        };
+        
+
+        // loop through returned rows and delete file from s3 and delte entry from mysql database
+        for(const file of rows){
+            //decrypt file name
+            const decryptedFileKey = decryptData(file.file_name);
+
+            // delete from s3
+            const deleted = await deleteFileFromS3(decryptedFileKey);
+
+            // delete from mysql
+            if (deleted) {
+                await connection.execute(`DELETE FROM file_uploads WHERE id = ?`, [file.id]);
+                console.log(`Deleted from MySQL: ${decryptedFileKey}`);
+            }
+        };
+    }catch(dbError){
+        console.error('Database query failed:', dbError);
+    };
+};
+
+// automatically delete expired files every given time
+cron.schedule('*/10 * * * *', () => { // every 10 minutes
+    console.log("Running cleanup job...");
+    deleteExpiredFiles();
+});
 
 
 // export objects and functions

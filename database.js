@@ -1,10 +1,20 @@
 require('dotenv').config();
 const AWS = require('aws-sdk');
 const mysql = require('mysql2');
+const mysqlPromise = require('mysql2/promise')
 const bcrypt = require('bcrypt'); // bcrypt included
 
 // Create the connection pool
 const pool = mysql.createPool({
+    host: process.env.MYSQLHOST,
+    user: process.env.MYSQLUSER,
+    password: process.env.MYSQLPASSWORD,
+    database: process.env.MYSQLDATABASE,
+    port: process.env.MYSQLPORT
+});
+
+// Create the connection pool with promise
+const poolPromise = mysqlPromise.createPool({
     host: process.env.MYSQLHOST,
     user: process.env.MYSQLUSER,
     password: process.env.MYSQLPASSWORD,
@@ -45,5 +55,6 @@ function testQuery() {
 
 module.exports = {
     pool,
+    poolPromise
 };
 
