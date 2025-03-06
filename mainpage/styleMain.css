@@ -149,9 +149,9 @@ body {
   align-items: flex-start; 
   position: relative;
   z-index: 1000; /* bring to front */
-
-  position: fixed;
-  bottom: 0;
+  bottom: auto;
+  position: relative;
+  bottom: auto;
   left:0;
 }
 
@@ -159,6 +159,7 @@ body {
   background-color: #f3e4e2;
   width: 100%;
   gap: 20px;
+  color: #0A1172  ; /* Navy color */
   padding-left: 20px;
   padding-top: 20px;
   display: flex;
@@ -179,7 +180,7 @@ body {
 .footer-link {
   font-weight: bold;
   text-decoration: underline;
-  color: black;
+  color: #0A1172 ; /* Navy color */
   transition: color 0.3s ease;
 }
 .footer-link:hover {
@@ -188,6 +189,6 @@ body {
 /*Copyright Infrigement*/
 #footer p {
   font-size: 0.8em;
-  color: black;
+  color: #0A1172; /* Navy color */
   padding-left: 20px;
 }
