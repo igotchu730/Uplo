@@ -55,10 +55,14 @@ async function insertFileUpload(id, ipAddress, fileName, pageLink, s3Link, fileS
 
       // Time fields 
       // Get current time in UTC, and adjust format for mysql
-      const currentTime = DateTime.now().setZone('America/Los_Angeles').toSQL({ includeOffset: false });
+      //const currentTime = DateTime.now().setZone('America/Los_Angeles').toSQL({ includeOffset: false });
       // Expiration time (set to 24 hours later), and adjust format for mysql
-      const expirationTime = DateTime.now().setZone('America/Los_Angeles').plus({ hours: 24 }).toSQL({ includeOffset: false });
-
+      //const expirationTime = DateTime.now().setZone('America/Los_Angeles').plus({ hours: 24 }).toSQL({ includeOffset: false });
+      
+      // Get current time in UTC, formatted for MySQL
+      const currentTime = DateTime.utc().toSQL({ includeOffset: false });
+      // Expiration time (24 hours later), formatted for MySQL
+      const expirationTime = DateTime.utc().plus({ hours: 24 }).toSQL({ includeOffset: false });
 
       // Insert the hashed data into the file_uploads table
       const query = 'INSERT INTO file_uploads (id, ip_address, ip_hash, file_name, page_link, s3_link, file_size, expiration_date, created_at) VALUES (?, ?, SHA2(?, 256), ?, ?, ?, ?, ?, ?)';
