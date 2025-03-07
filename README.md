@@ -46,6 +46,19 @@ A lightweight, temporary file-sharing application that allows users to upload fi
 
 ---
 
+## Tests
+1. Ensure that the node server is running by running command: 'node app.js or npm start'.
+2. Open a new terminal and ensure that the current directory is the project folder.
+3. Now run the test files using command: 'node test_file_of_choice'
+4. List of test files:
+   - testDeletion.js
+   - testInsert.js
+   - testRetrieve.js
+   - testS3LinkUpdate.js
+   - checkIPCount.js
+
+---
+
 ### Authors
 - Joey Gomez
 - Chris Guevara
