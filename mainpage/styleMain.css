@@ -192,3 +192,17 @@ body {
   color: #0A1172; /* Navy color */
   padding-left: 20px;
 }
+
+.github-logo {
+  position: absolute;
+  right: 100px;
+  width: 30px;
+  bottom: 27px;
+  height: auto;
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
+
+.github-logo:hover {
+  opacity: 1;
+}

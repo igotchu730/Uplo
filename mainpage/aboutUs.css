@@ -57,3 +57,17 @@ body {
   max-height: 80vh; /* Allows scrolling inside */  
   margin-bottom: 10px; /* Creates space between the container and the footer */
 }
+
+.github-logo {
+  position: absolute;
+  right: 100px;
+  width: 30px;
+  bottom: 33px;
+  height: auto;
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
+
+.github-logo:hover {
+  opacity: 1;
+}
