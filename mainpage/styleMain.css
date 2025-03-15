@@ -18,14 +18,13 @@ body {
   justify-content: center;
   width: 100%; /* Ensure containers stay within viewport */
   height: 100%;
-  
   overflow-y: auto; /* overflow for container, auto scrolling */
   overflow-x: hidden;
 }
 
 /* Header styling */
 #header {
-  background-color: #00002A;
+  background-color: #060647;    /*To change the top container background color, original color was #00002A;*/
   height: 75px;
   width: 100%;
   display: flex;
@@ -141,7 +140,7 @@ body {
 
 /* Footer styling */
 #footer {
-  background-color: #f3e4e2; /* Greyish background */
+  background-color: #090919; /* background */
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -156,7 +155,7 @@ body {
 }
 
 #footer-content {
-  background-color: #f3e4e2;
+  background-color: #060647;    /*To change the footer container background color, original color was #00002A;*/
   width: 100%;
   gap: 20px;
   color: #0A1172  ; /* Navy color */
@@ -168,7 +167,7 @@ body {
 }
 
 #copyright{
-  background-color:#f3e4e2;
+  background-color:#060647; /*To change the copyright container background color, original color was #00002A;*/
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -180,7 +179,7 @@ body {
 .footer-link {
   font-weight: bold;
   text-decoration: underline;
-  color: #0A1172 ; /* Navy color */
+  color: white ; /* Navy color */
   transition: color 0.3s ease;
 }
 .footer-link:hover {
@@ -189,7 +188,7 @@ body {
 /*Copyright Infrigement*/
 #footer p {
   font-size: 0.8em;
-  color: #0A1172; /* Navy color */
+  color: white; /* Navy color */
   padding-left: 20px;
 }
 

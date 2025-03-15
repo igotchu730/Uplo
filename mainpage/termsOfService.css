@@ -30,7 +30,7 @@ html, body {
   flex-grow: 1; /* Expands dynamically */
   min-height: calc(100vh - 130px);
   height: auto; /* Let content define height */
-  margin-top: 85px; /* Prevents header from cutting off the title */
+  margin-top: 0px; /* Prevents header from cutting off the title */
   margin-bottom: 60px; /* Prevents footer from blocking the last item */  
   display: flex;
   flex-direction: column;
