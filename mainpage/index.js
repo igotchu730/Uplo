@@ -3,8 +3,9 @@ const fileInput = document.getElementById('uploadFile'); // The file(s) the user
 const stagingBox = document.getElementById('staging'); // The staging box after users choose files.
 const addMoreButton = document.getElementById('addMoreButton'); // button to add moore files
 const resetButton = document.getElementById('resetButton'); // button to reset file upload
-
-
+const loadingBox = document.getElementById('loadingBox'); // box for loading progress
+const loadPercent = document.getElementById('loadPercent'); // loading progress percentage
+const submitButton = document.getElementById('submitButton'); // button for form submission
 
 //FOR TESTING: REMOVE LATER
 const logFiles = () => {
@@ -14,20 +15,44 @@ const logFiles = () => {
     }
 };
 
+// listen for pageshow which is when a page is loaded from cache mwhen user clicks back button
+window.addEventListener('pageshow', function(event) {
+    if(event.persisted){
+        // reload the page if its loaded from cache
+        window.location.reload();
+    };
+});
+
 // When the page is loaded...
 document.addEventListener("DOMContentLoaded", function() {
     stagingBox.style.display = 'none'; // Hide the staging box
-    uploadBox.addEventListener("click", function() { // The upload box when clicked will open the file explorer.
+    // The upload box when clicked will open the file explorer.
+    uploadBox.addEventListener("click", function() {
         fileInput.click();
     });
     addMoreButton.addEventListener('click', function(){ // The addMoreButton when clicked will open the file explorer.
         fileInput.click();
+        updateFileInput(); // fixes issue with add more button not getting size limit alert
     })
-    resetButton.addEventListener('click', function(){ // The resetButton when clicked will clear all file inputs and return to upload box.
+    // The resetButton when clicked will clear all file inputs and return to upload box.
+    resetButton.addEventListener('click', function(){
         fileInput.value = '';
         fileList = [];
         uploadBox.style.display = 'flex';
         stagingBox.style.display = 'none';
+        loadingBox.style.display = 'none';
+    })
+    // The submit button when clicked will start the progress loading.
+    submitButton.addEventListener('click', function(){
+        // check if at least one file is selected and is under 2.00GB
+        if(totalFileSizeInBytes(fileList) < (2 * (1024 ** 3)) && totalFileSizeInBytes(fileList) > 0){
+            uploadBox.style.display = 'none';
+            stagingBox.style.display = 'none';
+            loadingBox.style.display = 'flex';
+        }else{ // prevent upload
+            event.preventDefault();
+            alert('No files selected.');
+        }
     })
 });
 
@@ -151,6 +176,7 @@ fileInput.addEventListener('change',function(){ //listen for changes in file inp
     //FOR TESTING: REMOVE LATER
 })
 
+
 // function to remove a file from the manual file list at a given index
 function removeFile(index){
     fileList.splice(index,1); // at the given index, remove element
@@ -218,3 +244,10 @@ function totalFileSizeInGB(files){
     totalSize = formatFileSizeInGB(totalSize);
     return totalSize;
 };
+
+// listen for socket event overallProgress, update load percent
+const socket = io();
+socket.on('overallProgress', (progress) => {
+    loadPercent.textContent = `${progress}%`;
+});
+

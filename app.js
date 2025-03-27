@@ -1,13 +1,19 @@
 const express = require('express');
+const http = require('http');
+const socketIo = require('socket.io');
 const router = express.Router();
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
-const fetch = require('node-fetch');
 const app = express();
+const server = http.createServer(app);
+const io = socketIo(server);
+
+
 // import env
 require('dotenv').config();
-const PORT = process.env.PORT;
+
+// import objects and functions from other files
 const {
   generatePresignedURL,
   uploadFile,
@@ -16,6 +22,7 @@ const {
   setPartSize,
   maxUploadSize,
   generatePresignedURLView,
+  generatePresignedURLViewNoDownload,
 } = require('./cloud');
 const {
   zipper,
@@ -27,11 +34,20 @@ const {
   generateFileEmbed,
   updateS3Link,
   decryptData,
-  trackReadProgress
+  trackReadProgress,
+  progressEmitter,
+  checkIpCount,
 } = require('./utility');
 
+const PORT = process.env.PORT;
 const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
 const genericImg = `${baseUrl}/assets/testImg.png`;
+
+// listen for overallProgress events and use socket to emit progress to connected clients
+// basically redirecting the progress to the front end
+progressEmitter.on('overallProgress', (progress) => {
+    io.emit('overallProgress', progress);
+});
 
 // allow for reverse proxy
 app.set('trust proxy', true);
@@ -39,6 +55,10 @@ app.set('trust proxy', true);
 // Serve static files from the "mainpage" directory and "assets" folder
 app.use(express.static(path.join(__dirname, 'mainpage')));
 app.use('/assets',express.static(path.join(__dirname,'assets')));
+
+// serve files from public directory
+app.use(express.static(path.join(__dirname, '')));
+
 
 // Middleware
 app.use(express.json());
@@ -51,7 +71,7 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'mainpage', 'index.html'));
 });
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
 
@@ -88,7 +108,33 @@ const upload = multer({storage});
 // http post endppint
 app.post('/upload', upload.array('files'), async (req,res) => {
 
-    // retrieve user inputed title for uploade
+    // retrieve user ip and check if they have surpassed daily limit
+    const userIp = getClientIp(req);
+    const IPCount = await checkIpCount(userIp);
+    console.log('IP Count: ', IPCount);
+    if(IPCount >= 3){
+        if (req.files) { //delete file before returning
+            req.files.forEach(file => {
+                const filePath = path.join(__dirname, 'uploads', file.filename);
+                fs.unlink(filePath, (err) => {
+                    if (err) console.error(`Error deleting file ${file.filename}:`, err);
+                    else console.log(`Deleted file ${file.filename} due to upload limit.`);
+                });
+            });
+        } //return user to home page and send alert 
+        return res.status(400).send(`
+            <html>
+                <body>
+                    <script>
+                        alert("Daily limit of 3 uploads per user.");
+                        window.history.back();
+                    </script>
+                </body>
+            </html>
+        `);
+    };
+
+    // retrieve user inputed title for upload
     let title = req.body.uploadTitle;
     //console.log('Uploaded Title:', title);
 
@@ -136,12 +182,10 @@ app.post('/upload', upload.array('files'), async (req,res) => {
                     title = `${sanitizedFileName}-${randomKey()}${fileExt}` // combine to make new title, ext includes '.'. Also added random Key
                 }
 
-                // get user IP and downloadlink
-                const userIp = getClientIp(req);
                 const downloadLink = 'https://testlink.com'
 
                 // create unique id for upload
-                const id = randomKey();
+                const id = `${randomKey()}${path.extname(fileName)}`;
 
                 // create page link
                 const pageLink = `${baseUrl}/file/${id}`;
@@ -191,7 +235,7 @@ app.post('/upload', upload.array('files'), async (req,res) => {
 
             // if user title is empty, use a default name
             if (!title || title.trim() === '') {
-                title = 'zipped-files';
+                title = 'zipped_files';
             };
 
             const sanitizedFileName = sanitizeFileName(title); // sanitize name
@@ -211,13 +255,10 @@ app.post('/upload', upload.array('files'), async (req,res) => {
             const zippedFileStats = fs.statSync(zippedFilePath);
             const zippedFileSize = zippedFileStats.size;
 
-            // get user IP and downloadlink
-            const userIp = getClientIp(req);
-            //console.log('User IP Address:', userIp);
             const downloadLink = 'https://testlink.com'
 
             // create unique id for upload
-            const id = randomKey();
+            const id = `${randomKey()}${path.extname(zippedFileName)}`;
 
             // create page link
             const pageLink = `${baseUrl}/file/${id}`;
@@ -394,13 +435,31 @@ router.get('/file/:uniqueId', async (req,res) => {
         // retrieve file name from database using id
         const retrievedfileName = await retrieveFileUploadData(uniqueId,'file_name');
         const fileName = decryptData(retrievedfileName);
+        let cleanName = fileName.replace(/-(?!.*-).*?\./, '.');
+
+
+        // retrieve share link from database using id
+        const retrievedShareLink = await retrieveFileUploadData(uniqueId,'page_link');
+        let shareLink = decryptData(retrievedShareLink);
+
+        // retrieve expiration date and time from database using id
+        const retrievedExpirationDate = await retrieveFileUploadData(uniqueId,'expiration_date');
+
         if (!fileName) {
             throw new Error(`No data found with id: ${uniqueId}`);
         }
         // determine file type by extracting ext
         const fileExt = fileName.split('.').pop().toLowerCase();
+
         // generate presigned url
         const presignedUrl = await generatePresignedURLView(fileName);
+        // create a seperate variable to contain the presigned url to use
+        let presignedUrlToUse= presignedUrl;
+        // generate presigned url without forcing download for pdf preview, assign to urltouse
+        if(fileExt === 'pdf'){
+            presignedUrlToUse = await generatePresignedURLViewNoDownload(fileName);
+        }
+
         //update s3 link
         updateS3Link(uniqueId,presignedUrl);
 
@@ -418,10 +477,11 @@ router.get('/file/:uniqueId', async (req,res) => {
             ogImage = presignedUrl;
         // for videos, try to embed
         } else if (['mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv'].includes(fileExt)) {
+            shareLink = `${baseUrl}/video/${fileName}`;
             ogType = "video";
             ogMediaTags = `
-                <meta property="og:video" content="${presignedUrl}" />
-                <meta property="og:video:secure_url" content="${presignedUrl}" />
+                <meta property="og:video" content="${shareLink}" />
+                <meta property="og:video:secure_url" content="${shareLink}" />
                 <meta property="og:video:type" content="video/mp4" />
             `;
         }
@@ -430,8 +490,12 @@ router.get('/file/:uniqueId', async (req,res) => {
         res.send(`
             <html>
             <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <title>Uplo - View File</title>
-                <meta property="og:title" content="View File: ${fileName}" />
+                <link rel="stylesheet" href="/styleSharePage.css">
+
+                <meta property="og:title" content="View File: ${cleanName}" />
                 <meta property="og:description" content="Click to view or download this file." />
                 <meta property="og:type" content="${ogType}" />
                 <meta property="og:url" content="${baseUrl}/file/${uniqueId}" />
@@ -446,27 +510,35 @@ router.get('/file/:uniqueId', async (req,res) => {
                 <meta name="theme-color" content="#FA8072" />
             </head>
             <body>
-                <h1>File: ${fileName}</h1>
-                <div>
-                    ${generateFileEmbed(fileExt,presignedUrl)}
+                <div id="header">
+                    <div id="logo">
+                        <!--<img src="logo.jpg" id="logo" alt="Logo"> -->
+                        ....LOGO
+                    </div>
+                    <div id="overallShare">
+                        <div id="shareLinkAndButton">
+                            <input type="text" value="${shareLink}" id="copyLink" readonly>
+                            <button onclick="copyText()" id="copyButton">
+                                <img class="iconClass" id="copyIcon" src="/assets/copyIcon.png">
+                            </button>
+                        </div>
+                        <div id="toolTip">Copy Link</div>
+                    </div>
+                    <div id="downloadContainer">
+                        <button id="downloadBtn" data-url="${presignedUrl}">
+                            <img class="iconClass" src="/assets/downloadIcon.png">
+                            <div id="downText">Download</div>
+                        </button>
+                    </div>
                 </div>
-                <button id="downloadBtn" data-url="${presignedUrl}">Download File</button>
-                <script>
-                    //listens for button click.
-                    document.getElementById('downloadBtn').addEventListener('click', function() {
+                <div id="main-body">
+                    <div id="embed">
+                        ${generateFileEmbed(fileExt,presignedUrlToUse,cleanName)}
+                    </div>
+                    <div id="infoBox"></div>
+                </div>
 
-                        //get stored presigned url
-                        const url = this.getAttribute('data-url');
-                        console.log("Download URL:", url);
-                        if (!url) {
-                            console.error("Error: No download URL found.");
-                            return;
-                        }
-
-                        // redirects browser to given url
-                        window.location.href = url;
-                    });
-                </script>
+                <script src="/indexSharePage.js"></script>
             </body>
             </html>
         `);
@@ -475,3 +547,69 @@ router.get('/file/:uniqueId', async (req,res) => {
         res.status(500).send(`Error retrieving file information: ${error.message}`);
     }
 });
+
+// streams videos from s3, allow seekiong
+app.get("/video/:key", async (req, res) => {
+    try {
+        // get file name 
+        const { key } = req.params;
+        // get the range header
+        const range = req.headers.range;
+
+        // bucket and file name
+        const headParams = {
+            Bucket: process.env.S3_BUCKET_NAME,
+            Key: key,
+        };
+
+        // get the file metadata to determine size
+        const headObject = await s3.headObject(headParams).promise();
+        const fileSize = headObject.ContentLength;
+
+        // if range header is not present, serve enitre video
+        if (!range) {
+            const streamParams = {
+                Bucket: process.env.S3_BUCKET_NAME,
+                Key: key,
+            };
+            const stream = s3.getObject(streamParams).createReadStream();
+            res.writeHead(200, {
+                "Content-Length": fileSize,
+                "Content-Type": "video/mp4",
+            });
+            return stream.pipe(res);
+        }
+
+        // if range header exists, extract bytes from header and convert to int
+        const parts = range.replace(/bytes=/, "").split("-");
+        const start = parseInt(parts[0], 10);
+        const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+        // invalid range
+        if (start >= fileSize || end >= fileSize) {
+            return res.status(416).send("Requested range not satisfiable");
+        }
+        // stream only request portion
+        const streamParams = {
+            Bucket: process.env.S3_BUCKET_NAME,
+            Key: key,
+            Range: `bytes=${start}-${end}`,
+        };
+        const stream = s3.getObject(streamParams).createReadStream();
+
+        // handle range requests, allow partial content delivery
+        res.writeHead(206, {
+            "Content-Range": `bytes ${start}-${end}/${fileSize}`,
+            "Accept-Ranges": "bytes",
+            "Content-Length": end - start + 1,
+            "Content-Type": "video/mp4",
+        });
+        stream.pipe(res);
+
+    // error handling
+    } catch (error) {
+        console.error("Error streaming video:", error);
+        res.status(500).send("Error streaming video");
+    }
+});
+
+

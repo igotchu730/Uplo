@@ -1,0 +1,535 @@
+/* Reset body margins and padding */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    overflow: hidden; /* hide overflows */
+    width: 100%; /* Ensures full width */
+    height: 100%; /* custom full height, controls scrolling area */
+    box-sizing: border-box;
+    background-color: #f3e4e2;
+    min-width: 300px;
+}
+
+/* styling for icons, highlighting, and input focus */
+.iconClass {
+    width: 20px;
+    height: 20px;
+} 
+/* utility class for hidingmouse cursor */
+.hideMouse {
+    cursor: none;
+}
+
+
+::selection { /* highlighting for most browsers */
+    background-color: #aacae6;
+    color: #000;
+}
+::-moz-selection { /* highlighting for firefox */
+    background-color: #aacae6;
+    color: #000;
+} 
+
+
+
+/* Header styling */
+#header {
+    background-color: #00002A;
+    height: 85px;
+    width: 100%;
+    top:0;
+    left:0;
+    position:relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000; /* keeps the header on top */
+}
+/* styling for logo container*/
+#logo {
+    width: 80%;
+    color: white;
+}
+/* styling for overall share link and button container*/
+#overallShare{
+    width: 350px;
+}
+/* styling for share link and button container*/
+#shareLinkAndButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 40px;
+}
+/* styling for share link */
+#copyLink {
+    width: 100%;
+    height: 100%;
+    border-radius: 20px 0px 0px 20px;
+    border: none;
+    padding-left: 15px;
+    font-size: 14px;
+}
+/* styling for input focus */
+#copyLink:focus{
+    outline: 2px solid #FA8072;
+}
+#copyLink:focus + #copyButton{
+    outline: 2px solid #FA8072;
+}
+/* styling for share button */
+#copyButton {
+    width: 60px;
+    color: white;
+    background-color: #FA8072;
+    border-radius: 0px 20px 20px 0px;
+    border: none;
+    padding: 10px 10px 10px 5px;
+    cursor: pointer;
+    /* Add shadow */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    /* Smooth transition for hover and click effects */
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    font-size: 13px;
+}
+/* Hover effect: Slightly darken the button and increase shadow */
+#copyButton:hover {
+    background-color: hsl(6, 93%, 78%);
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.3);
+}
+/* Active/click effect: Change color to a darker pink */
+#copyButton:active {
+    background-color: #FA8072;
+    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.2);
+}
+/* styling for header items container*/
+#overallShare {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+/* styling for tooltip*/
+#toolTip {
+    display: none;
+    position: fixed;
+    white-space: nowrap;
+    padding: 5px;
+    border-radius: 5px;
+    font-size: 14px;
+    background-color: #4948489c;
+    color: white;
+    top: 67px;
+    right: 170px;
+}
+
+
+
+/* styling for download container */
+#downloadContainer {
+    margin: 0px 25px 0px 35px;
+}
+/* styling for download button */
+#downloadBtn {
+    width: 125px;
+    height: 40px;
+    color: white;
+    background-color: #FA8072;
+    border-radius: 20px;
+    padding: 10px 10px 10px 5px;
+    border: none;
+    cursor: pointer;
+    /* Add shadow */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    /* Smooth transition for hover and click effects */
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+}
+/* Hover effect: Slightly darken the button and increase shadow */
+#downloadBtn:hover {
+    background-color: hsl(6, 93%, 78%);
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.3);
+}
+/* Active/click effect: Change color to a darker pink */
+#downloadBtn:active {
+    background-color: #FA8072;
+    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+
+
+
+/* styling for main body */
+#main-body {
+    background-color: black;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: start;
+    overflow: auto;
+}
+/* styling for embedded file */
+#embed {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: black;
+    padding: 0px;
+}
+
+
+
+
+/* styling for video container */
+#video {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 100%;
+    max-height: 100%;
+    overflow: hidden; /* prevent oversized video */
+}
+/* styling for video player*/
+#videoPlayer {
+    max-width: 90vw; /* video cannot exceed 90% of the vw */
+    max-height: 80vh; /* video cannot exceed 80% of the vh */
+    width: auto; /* keep aspect ratio */
+    height: auto; /* keep aspect ratio */
+    display: block;
+    object-fit: contain; /* prevent cropping */
+}
+/* for screen pausing etc */
+#video:hover #videoPausePlay{
+    opacity: 100;
+    visibility: visible;
+}
+/* pause-play buttons */
+#videoPausePlay {
+    width: 5%;
+    position: absolute;
+    cursor: pointer;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+}
+
+
+
+
+/* styling for audio container */
+#audio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    max-width: 100%;
+    max-height: 100%;
+    overflow: hidden; /* prevent oversized images */
+}
+#totalAudio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    max-width: 50vw; /* image cannot exceed 50% of the vw */
+    max-height: 100vh; /* image cannot exceed 100% of the vh */
+    width: auto; /* keep aspect ratio */
+    height: auto; /* keep aspect ratio */
+    display: block;
+    object-fit: contain; /* prevent cropping */
+}
+/* styling for audio player */
+#audioControl {
+    width: 100%;
+    background-color: #f0f3f4;
+    filter: invert(1);
+}
+/* styling for audio screen container */
+#audioScreen {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+/* styling for audio background */
+#audioBG {
+    width: 100%;
+    border: none;
+    transition: filter 0.3s ease-in-out;
+}
+/* for screen pausing etc */
+#audioScreen:hover #audioBG{
+    filter: brightness(50%) contrast(90%) blur(3px);
+}
+#audioScreen:hover #audioPausePlay{
+    opacity: 100;
+    visibility: visible;
+}
+/* pause-play buttons */
+#audioPausePLay {
+    width: 5%;
+    position: absolute;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+}
+
+
+
+
+/* styling for image container */
+#image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 100%;
+    max-height: 100%;
+    overflow: hidden; /* prevent oversized images */
+}
+/* styling for image */
+#imageScreen {
+    max-width: 90vw; /* image cannot exceed 90% of the vw */
+    max-height: 80vh; /* image cannot exceed 80% of the vh */
+    width: auto; /* keep aspect ratio */
+    height: auto; /* keep aspect ratio */
+    display: block;
+    object-fit: contain; /* prevent cropping */
+}
+
+
+
+
+/* styling for pdf container */
+#pdf {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 100%;
+    max-height: 100%;
+    overflow: hidden; /* prevent oversized pdf */
+}
+/* styling for pdf */
+#pdfScreen {
+    width: 100vw; /* pdf cannot exceed 100% of the vw */
+    height: 85vh; /* pdf cannot exceed 85% of the vh */
+    display: block;
+    object-fit: contain; /* prevent cropping */
+    border: none;
+}
+
+
+
+
+/* styling for text container */
+#text {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 100%;
+    max-height: 100%;
+    overflow: hidden;
+}
+/* styling for text */
+#textScreen {
+    max-width: 90vw; /* text cannot exceed 90% of the vw */
+    max-height: 80vh; /* text cannot exceed 80% of the vh */
+    width: auto; /* keep aspect ratio */
+    height: auto; /* keep aspect ratio */
+    display: block;
+    object-fit: contain; /* prevent cropping */
+    background-color: white;
+    overflow: auto;
+    padding: 20px;
+    white-space: pre;
+}
+
+
+
+
+/* styling for doc container */
+#office {
+    display: block;
+    align-items: center;
+    justify-content: center;
+    max-width: 100%;
+    max-height: 100%;
+    overflow: hidden; /* prevent oversized doc */
+}
+/* styling for doc */
+#officeScreen {
+    width: 100vw; /* pdf cannot exceed 100% of the vw */
+    height: 85vh; /* pdf cannot exceed 85% of the vh */
+    display: block;
+    object-fit: contain; /* prevent cropping */
+    border: none;
+}
+
+
+
+
+/* styling for zip container */
+#zip {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    max-width: 100%;
+    max-height: 100%;
+    overflow: hidden; /* prevent oversized images */
+}
+/* styling for zip background */
+#zipBG {
+    max-width: 90vw; /* image cannot exceed 90% of the vw */
+    max-height: 75vh; /* image cannot exceed 75% of the vh */
+    width: auto; /* keep aspect ratio */
+    height: auto; /* keep aspect ratio */
+    display: block;
+    object-fit: contain; /* prevent cropping */
+}
+/* styling for zip label */
+#zipLabel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #555555;
+    width: 100%;
+    margin: 0px;
+    padding: 15px;
+    color: white;
+    font-size: 24px;
+    overflow: hidden;
+}
+
+
+
+
+/* styling for unknown container */
+#unknown {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    max-width: 100%;
+    max-height: 100%;
+    overflow: hidden; /* prevent oversized images */
+}
+/* styling for unknown background */
+#unknownBG {
+    max-width: 90vw; /* image cannot exceed 90% of the vw */
+    max-height: 75vh; /* image cannot exceed 75% of the vh */
+    width: auto; /* keep aspect ratio */
+    height: auto; /* keep aspect ratio */
+    display: block;
+    object-fit: contain; /* prevent cropping */
+}
+/* styling for unknown label */
+#unknownLabel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #555555;
+    width: 100%;
+    margin: 0px;
+    padding: 15px;
+    color: white;
+    font-size: 24px;
+    overflow: hidden;
+}
+
+
+
+
+
+/* container for title and expiration */
+#infoBox {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    max-height: 20vh;
+    background-color: #090919;
+}
+/* styling for title container */
+#titleBox {
+    width: 30%;
+    margin: 20px 20px 0px 0px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+/* styling for label */
+#fileLabel {
+    width: 25%;
+    height: 100%;
+    border-radius: 5px 0px 0px 5px;
+    color: white;
+    background-color: #FA8072;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+/* styling for title */
+#title {
+    width: 75%;
+    border-radius: 0px 5px 5px 0px;
+    border: none;
+    color: black;
+    background-color: #f2f2f2;
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    padding: 10px 15px 10px 15px;
+    font-size: 16px;
+}
+/* styling for expir date container */
+#expirBox {
+    width: 30%;
+    margin: 10px 20px 20px 0px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+/* styling for expir label */
+#expirLabel {
+    width: 25%;
+    height: 100%;
+    border-radius: 5px 0px 0px 5px;
+    color: white;
+    background-color: #7daed8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+/* styling for expir date */
+#expirDate {
+    width: 75%;
+    border-radius: 0px 5px 5px 0px;
+    border: none;
+    color: black;
+    background-color: #f2f2f2;
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    padding: 10px 15px 10px 15px;
+    font-size: 16px;
+}

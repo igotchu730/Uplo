@@ -1,9 +1,9 @@
 /* staging container styling */
 #staging {
-    border-bottom-right-radius: 20px;
-    border-bottom-left-radius: 20px;
-    border-top-right-radius: 5px;
-    border-top-left-radius: 5px;
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-top-left-radius: 10px;
     background-color: #f2f2f2;
     width: 550px; 
     height: 500px; 

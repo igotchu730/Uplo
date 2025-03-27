@@ -50,24 +50,18 @@ async function insertFileUpload(id, ipAddress, fileName, pageLink, s3Link, fileS
       const encryptedS3Link = await encryptData(s3Link);
       const encryptedPageLink = await encryptData(pageLink);
 
-      // no encryption to test for mysql database, remove later
-      //const encryptedIpAddress = ipAddress;
-      //const encryptedFileName = fileName;
-      //const encryptedS3Link = s3Link;
-      //const encryptedPageLink = pageLink;
-
       // upload size
       const uploadSize = fileSize;
 
-      // Time fields 
-      // Get current time in PST, and adjust format for mysql
-      const currentTime = DateTime.now().setZone('America/Los_Angeles').toSQL({ includeOffset: false });
-      // Expiration time (set to 24 hours later), and adjust format for mysql
-      const expirationTime = DateTime.now().setZone('America/Los_Angeles').plus({ hours: 24 }).toSQL({ includeOffset: false });
 
       // Insert the hashed data into the file_uploads table
-      const query = 'INSERT INTO file_uploads (id, ip_address, ip_hash, file_name, page_link, s3_link, file_size, expiration_date, created_at) VALUES (?, ?, SHA2(?, 256), ?, ?, ?, ?, ?, ?)';
-      const values = [id, encryptedIpAddress,ipAddress, encryptedFileName, encryptedPageLink, encryptedS3Link, uploadSize, expirationTime, currentTime];
+      const query = `
+          INSERT INTO file_uploads 
+          (id, ip_address, ip_hash, file_name, page_link, s3_link, file_size, expiration_date, created_at) 
+          VALUES (?, ?, SHA2(?, 256), ?, ?, ?, ?, DATE_ADD(UTC_TIMESTAMP(), INTERVAL 24 HOUR), UTC_TIMESTAMP());
+      `;
+      
+      const values = [id, encryptedIpAddress, ipAddress, encryptedFileName, encryptedPageLink, encryptedS3Link, fileSize];
 
       pool.query(query, values, (err, results) => {
           if (err) {
@@ -257,36 +251,66 @@ function sanitizeFileName(title) {
 }
 
 // function to generate correct html based on retrieved file type
-const generateFileEmbed = (fileExtension, url) => {
+const generateFileEmbed = (fileExtension, url, fileName) => {
     if (['mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv'].includes(fileExtension)) {
-        return `<video controls width="600"><source src="${url}" type="video/${fileExtension}">Your browser does not support video.</video>`;
+        return `<div id="video">
+                    <video controls id="videoPlayer">
+                        <source src="${url}" type="video/${fileExtension}">
+                        Your browser does not support video.
+                    </video>
+                    <img src="/assets/playIcon.png" id="videoPausePlay" draggable="false"/>
+                </div>`;
     }
     if (['mp3', 'wav', 'ogg', 'flac', 'aac'].includes(fileExtension)) {
-        return `<audio controls><source src="${url}" type="audio/${fileExtension}">Your browser does not support audio.</audio>`;
+        return `<div id="audio">
+                    <div id="totalAudio">
+                        <div id="audioScreen" draggable="false">
+                            <img src="/assets/audioBG2.png" id="audioBG" draggable="false"/>
+                            <img src="/assets/playIcon.png" id="audioPausePlay" draggable="false"/>
+                        </div>
+                        <audio controls id="audioControl">
+                            <source src="${url}" type="audio/${fileExtension}">
+                            Your browser does not support audio.
+                        </audio>
+                    </div>
+                </div>`;
     }
     if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tiff', 'svg'].includes(fileExtension)) {
-        return `<img src="${url}" alt="Image Preview" width="600"/>`;
+        return `<div id="image">
+                    <img src="${url}" alt="Image Preview" id="imageScreen"/>
+                </div>`;
     }
     if (['pdf'].includes(fileExtension)) {
-        return `<iframe src="${url}" width="600" height="800"></iframe>`;
+        return `<div id="pdf">
+                    <iframe id="pdfScreen" src="${url}"></iframe>
+                </div>`;
     }
     if (['txt', 'md'].includes(fileExtension)) {
-        return `<pre style="width: 600px; overflow: auto; border: 1px solid #ddd; padding: 10px;"><code>Fetching file...</code></pre>
+        return `<div id="text">
+                    <div id="textScreen"><code>Fetching file...</code></div>
+                </div>
                 <script>
                     fetch("${url}")
                         .then(response => response.text())
-                        .then(text => document.querySelector("pre code").textContent = text)
+                        .then(text => document.querySelector("div code").textContent = text)
                         .catch(err => console.error("Error loading file:", err));
                 </script>`;
     }
     if (['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(fileExtension)) {
-        return `<iframe src="https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(url)}" width="600" height="800"></iframe>
-                <p><a href="${url}" target="_blank">Open in Microsoft Office</a></p>`;
+        return `<div id="office">
+                    <iframe id="officeScreen" src="https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(url)}"></iframe>
+                </div>`;
     }
     if (['zip', 'rar', '7z', 'tar', 'gz'].includes(fileExtension)) {
-        return `<p>Compressed file detected. <a href="${url}" download>Download File</a></p>`;
+        return `<div id="zip">
+                    <img src="/assets/zipBG.png" id="zipBG" draggable="false"/>
+                    <p id="zipLabel">${fileName}</p>
+                </div>`;
     }
-    return `<p>File preview is not available. <a href="${url}" download>Download File</a></p>`;
+    return `<div id="unknown">
+                <img src="/assets/unknownBG.png" id="unknownBG" draggable="false"/>
+                <p id="unknownLabel">${fileName}</p>
+            </div>`;
 };
 
 
@@ -322,7 +346,6 @@ const trackReadProgress = (filePath) => {
     });
     return readStream;
 }
-
 
 
 // export objects and functions

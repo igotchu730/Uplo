@@ -6,6 +6,7 @@
     <title>Uplo</title>
     <link rel="stylesheet" href="styleMain.css">
     <link rel="stylesheet" href="styleUpload.css">
+    <link rel="stylesheet" href="styleLoad.css">
 
     <!-- Open Graph Meta Tags (for Discord, Facebook, LinkedIn) -->
     <meta property="og:title" content="Uplo - Simple File Sharing" />
@@ -77,7 +78,13 @@
                     <input id="submitButton" type="submit" value="Upload">
                 </div>
             </form>
-        
+            <div id="loadingBox">
+                <div id="loader">
+                    <div id="spinner"></div>
+                    <div id="loadPercent">0%</div>
+                    <div id="loadLabel">Uploading files</div>
+                </div>
+            </div>
         </div>
 
         <!-- Footer Section -->
@@ -98,6 +105,7 @@
 
     </div>
     <!-- javascript file linked-->
+    <script src="/socket.io/socket.io.js"></script>
     <script src="index.js"></script>
 </body>
 </html>
