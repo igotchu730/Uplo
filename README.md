@@ -18,23 +18,53 @@ A lightweight, temporary file-sharing application that allows users to upload fi
 
 ### Dependencies
 1. **Node.js**  
-   Ensure Node.js is installed on your system. Download it from [Node.js Official Site](https://nodejs.org/).
+   - Ensure Node.js is installed on your system. Download it from [Node.js Official Site](https://nodejs.org/).
 
 2. **Express**  
-   A web framework for Node.js used to handle API routing and server-side logic.
+   - A web framework for Node.js used to handle API routing and server-side logic.
 
 3. **dotenv**  
-   Used to load environment variables from a `.env` file into your application.
+   - Used to load environment variables from a `.env` file into your application.
 
 4. **node-fetch**  
-   A lightweight module that allows making HTTP requests from the server.
+   - A lightweight module that allows making HTTP requests from the server.
 
 5. **AWS SDK**  
-   Used to interact with AWS S3 for file uploads and downloads.
+   - Used to interact with AWS S3 for file uploads and downloads.
 
 6. **MySQL2**  
-   Used to access database for tracking uploads, file sizes, and temporary link expiration.
+   - Used to access database for tracking uploads, file sizes, and temporary link expiration.
 
+7. **Archiver**
+   - Used to zip folders and files before sending to S3\.
+
+8. **Axios**
+   - Used for easy http requests.
+
+9. **BCrypt**
+   - Used for secure hashing of data.
+
+10. **Fetch**
+    - Function for making http requests.
+
+11. **Luxon**
+    - Date and time library.
+
+12. **Multer**
+    - Middleware for handling file uploads.
+
+13. **Node-Cron**
+    - Scheduler to run tasks at set times and intervals.
+
+14. **Node-Fetch**
+    - Function for making http requests.
+
+15. **Progress-Stream**
+    - Tracks progress of streams.
+
+16. **socket.io**
+    - Allows real-time two-way communication between client and server.
+   
 ---
 
 ## Setup
