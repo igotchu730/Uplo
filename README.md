@@ -2,13 +2,13 @@
 
 A lightweight, temporary file-sharing application that allows users to upload files, generate temporary links, and share them effortlessly. Files are stored in AWS S3 and automatically deleted after a set period, ensuring privacy and reducing clutter. 
 
-<br><br>
+<br>
 <p align="center">
   <img src="assets/previewGif.gif" alt="Demo GIF" />
 </p>
-<br><br>
+<br>
 <p align="center">
-  <img src="assets/embed.png" alt="Alt Text" width="400"/>
+  <img src="assets/embed.png" alt="Alt Text" width="800"/>
 </p>
 
 
