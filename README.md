@@ -2,6 +2,8 @@
 
 A lightweight, temporary file-sharing application that allows users to upload files, generate temporary links, and share them effortlessly. Files are stored in AWS S3 and automatically deleted after a set period, ensuring privacy and reducing clutter. 
 
+"Like snapchat for files!"
+
 <br>
 <p align="center">
   <img src="assets/previewGif.gif" alt="Demo GIF" />
