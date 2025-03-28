@@ -1,7 +1,7 @@
 /* General Styles */
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
+  font-family: 'Open Sans', sans-serif;
   background-color: #aacae6; /* Matches main-body bg */
   display: flex;
   flex-direction: column;
@@ -65,9 +65,9 @@ body {
 
 .github-logo {
   position: absolute;
-  right: 100px;
+  right: 30px;
   width: 30px;
-  bottom: 33px;
+  bottom: 27px;
   height: auto;
   opacity: 0.8;
   transition: opacity 0.3s ease;

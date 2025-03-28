@@ -66,20 +66,8 @@ body {
   width: 100%;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  padding-right: 2%;
-  position: relative;
+  justify-content: flex-start;
 }
-
-/* Style the logo */
-/*
-#logo {
-  height: 8vh; 
-  width: 10vh;
-  margin-right: auto; 
-  margin-left: 1%; 
-}
-*/
 
 #aboutUs {
   color: white;

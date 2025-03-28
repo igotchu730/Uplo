@@ -508,27 +508,29 @@ router.get('/file/:uniqueId', async (req,res) => {
                 <!-- Favicon & Theme Color -->
                 <link rel="icon" href="${genericImg}" />
                 <meta name="theme-color" content="#FA8072" />
+                <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
             </head>
             <body>
                 <div id="header">
-                    <div id="logo">
-                        <!--<img src="logo.jpg" id="logo" alt="Logo"> -->
-                        ....LOGO
-                    </div>
-                    <div id="overallShare">
-                        <div id="shareLinkAndButton">
-                            <input type="text" value="${shareLink}" id="copyLink" readonly>
-                            <button onclick="copyText()" id="copyButton">
-                                <img class="iconClass" id="copyIcon" src="/assets/copyIcon.png">
+                    <a href="/mainpage/index.html">
+                        <img src="/assets/UploLogoWhite.png" id="headerLogo" title="Uplo Home">
+                    </a>
+                    <div id="spacer">
+                        <div id="overallShare">
+                            <div id="shareLinkAndButton">
+                                <input type="text" value="${shareLink}" id="copyLink" readonly>
+                                <button onclick="copyText()" id="copyButton">
+                                    <img class="iconClass" id="copyIcon" src="/assets/copyIcon.png">
+                                </button>
+                            </div>
+                            <div id="toolTip">Copy Link</div>
+                        </div>
+                        <div id="downloadContainer">
+                            <button id="downloadBtn" data-url="${presignedUrl}">
+                                <img class="iconClass" src="/assets/downloadIcon.png">
+                                <div id="downText">Download</div>
                             </button>
                         </div>
-                        <div id="toolTip">Copy Link</div>
-                    </div>
-                    <div id="downloadContainer">
-                        <button id="downloadBtn" data-url="${presignedUrl}">
-                            <img class="iconClass" src="/assets/downloadIcon.png">
-                            <div id="downText">Download</div>
-                        </button>
                     </div>
                 </div>
                 <div id="main-body">

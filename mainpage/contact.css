@@ -5,6 +5,7 @@ html, body {
   padding: 0;
   display: flex;
   flex-direction: column;
+  font-family: 'Open Sans', sans-serif;
 }
 
 /* Main Content Section */
