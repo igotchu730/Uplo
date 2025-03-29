@@ -1,12 +1,12 @@
-/* General Styles */
-body {
+/* Ensure Full Page Usage */
+html, body {
+  height: 100%;
   margin: 0;
-  font-family: 'Open Sans', sans-serif;
-  background-color: #0a063c; /* Matches main-body bg */
+  padding: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
-} 
+  font-family: 'Open Sans', sans-serif;
+}
 
 /* Main Content Section */
 #main-body {
@@ -27,7 +27,6 @@ body {
   margin-bottom: 95px; /* Prevents footer from blocking the last item */  
   display: flex;
   flex-direction: column;
-  font-size: 25px;
 }
 
 /* Footer Styling */
@@ -38,23 +37,19 @@ body {
   left: 0;
 }
 
-#footer-half{
-  display: flex;
-  flex-direction: column;
+/* Alternating Section Colors */
+.section {
+  padding: 20px;
+  border-radius: 10px;
+  margin: 10px 0;
 }
 
-
-.github-logo {
-  position: relative;
-  width: 40px;
-  height: auto;
-  opacity: 0.8;
-  transition: opacity 0.3s ease;
-  right: 20px;
+.white {
+  background-color: white;
 }
 
-.github-logo:hover {
-  opacity: 1;
+.grey {
+  background-color: #F7F7F7; /* Light grey alternating sections */
 }
 
 
@@ -63,6 +58,5 @@ body {
   #terms-content {
     margin-bottom: 225px; /* Prevents footer from blocking the last item */
     width: 100%;
-    font-size: 15px;
   }
 }
