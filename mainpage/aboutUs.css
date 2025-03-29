@@ -2,7 +2,7 @@
 body {
   margin: 0;
   font-family: 'Open Sans', sans-serif;
-  background-color: #aacae6; /* Matches main-body bg */
+  background-color: #0a063c; /* Matches main-body bg */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -27,23 +27,7 @@ body {
   margin-bottom: 95px; /* Prevents footer from blocking the last item */  
   display: flex;
   flex-direction: column;
-}
-
-/* Title Styling */
-#terms-content h1 {
-  font-size: 2.8rem;
-  color: #00002A;
-  margin-bottom: 20px;
-  text-align: left; /* Matches privacy page */
-}
-
-/* Paragraph Styling */
-#terms-content p {
-  font-size: 1.4rem;
-  line-height: 1.8;
-  color: #00002A;
-  margin-bottom: 20px;
-  text-align: justify;
+  font-size: 25px;
 }
 
 /* Footer Styling */
@@ -76,20 +60,9 @@ body {
 
 
 @media(max-width:525px){
-  #terms-content h1 {
-    font-size: 2.0rem;
-    color: #00002A;
-    margin-bottom: 5px;
-    text-align: start;
-  }
-  #terms-content p {
-    font-size: 1rem;
-    line-height: 1.8;
-    margin-bottom: 10px;
-    text-align: start;
-  }
   #terms-content {
     margin-bottom: 225px; /* Prevents footer from blocking the last item */
     width: 100%;
+    font-size: 15px;
   }
 }
