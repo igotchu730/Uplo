@@ -7,7 +7,7 @@ body {
   width: 100vw; /* Ensures full width */
   height: 100vh; /* custom full height, controls scrolling area */
   box-sizing: border-box;
-  background-color: #f3e4e2;
+  background-color: #aacae6;
 }
 
 /* General container styling */
@@ -24,7 +24,7 @@ body {
 
 /* Header styling */
 #header {
-  background-color: #060647;    /*To change the top container background color, original color was #00002A;*/
+  background-color: #0a063c;    /*To change the top container background color, original color was #00002A;*/
   height: 75px;
   width: 100%;
   display: flex;
@@ -97,6 +97,7 @@ body {
   cursor: pointer;
   box-shadow: 0px 50px 50px hsla(0, 0%, 0%, 0.300);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  top: 20px;
 }
 
 /* when user hovers over upload box, animate the box */
@@ -145,12 +146,12 @@ body {
 
 /* Footer styling */
 #footer {
-  background-color: #090919; /* background */
+  background-color: #0a063c; /* background */
   width: 100%;
   display: flex;
-  flex-direction: column;
-  justify-content: flex-end; 
-  align-items: flex-start; 
+  flex-direction: row;
+  justify-content: space-between; 
+  align-items: center; 
   position: relative;
   z-index: 1000; /* bring to front */
   bottom: auto;
@@ -160,10 +161,9 @@ body {
 }
 
 #footer-content {
-  background-color: #060647;    /*To change the footer container background color, original color was #00002A;*/
+  background-color: #0a063c;    /*To change the footer container background color, original color was #00002A;*/
   width: 100%;
   gap: 20px;
-  color: #0A1172  ; /* Navy color */
   padding-left: 20px;
   padding-top: 20px;
   display: flex;
@@ -172,7 +172,7 @@ body {
 }
 
 #copyright{
-  background-color:#060647; /*To change the copyright container background color, original color was #00002A;*/
+  background-color:#0a063c; /*To change the copyright container background color, original color was #00002A;*/
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -199,15 +199,51 @@ body {
 }
 
 .github-logo {
-  position: absolute;
-  right: 30px;
-  width: 30px;
-  bottom: 27px;
+  position: relative;
+  width: 40px;
   height: auto;
   opacity: 0.8;
   transition: opacity 0.3s ease;
+  right: 20px;
 }
 
 .github-logo:hover {
   opacity: 1;
+}
+
+#footer-half{
+  display: flex;
+  flex-direction: column;
+}
+
+
+
+@media(max-width:525px){
+  #footer-content {
+    padding-left: 20px;
+    padding-top: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: start;
+  }
+  #copyright{
+    margin-top: 20px;
+  }
+  .github-logo {
+    margin-top: 175px;
+  }
+  #upload {
+    width: 250px; 
+    height: 250px; 
+  }
+  #upload-text {
+    font-size: 1em;
+  }
+  #custom-plus {
+    position: relative;
+    width: 75px; /* Width of the "+" symbol*/
+    height: 75px; /* Height of the "+" symbol*/
+  }
+
 }

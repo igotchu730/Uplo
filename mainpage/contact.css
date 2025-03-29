@@ -14,25 +14,17 @@ html, body {
   justify-content: center;
   align-items: stretch;
   width: 100%;
-  flex-grow: 1;
-  padding: 0;
-  min-height: 100vh; /* Ensures it expands to fit all content */
+  height: 100%;
 }
 
 /* White Container for Terms Content */
 #terms-content {
   background-color: white;
-  width: 100%;
-  max-width: 1300px;
-  padding: 40px;
-  border-radius: 0;
-  margin-bottom: 50px;
-  overflow-y: auto; /* Allows scrolling inside */
-  flex-grow: 1; /* Expands dynamically */
-  min-height: calc(100vh - 130px);
+  width: 75%;
   height: auto; /* Let content define height */
-  margin-top: 0px; /* Prevents header from cutting off the title */
-  margin-bottom: 60px; /* Prevents footer from blocking the last item */  
+  padding: 40px;
+  overflow-y: auto; /* Allows scrolling inside */
+  margin-bottom: 95px; /* Prevents footer from blocking the last item */  
   display: flex;
   flex-direction: column;
 }
@@ -61,3 +53,10 @@ html, body {
 }
 
 
+
+@media(max-width:525px){
+  #terms-content {
+    margin-bottom: 225px; /* Prevents footer from blocking the last item */
+    width: 100%;
+  }
+}

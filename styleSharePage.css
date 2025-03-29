@@ -7,8 +7,7 @@ body {
     width: 100%; /* Ensures full width */
     height: 100%; /* custom full height, controls scrolling area */
     box-sizing: border-box;
-    background-color: #f3e4e2;
-    min-width: 300px;
+    background-color: #090919;
 }
 
 /* styling for icons, highlighting, and input focus */
@@ -544,3 +543,74 @@ body {
     padding: 10px 15px 10px 15px;
     font-size: 16px;
 }
+
+
+
+@media (max-width: 650px) {
+    #header {
+        height: 100px;
+        justify-content: space-between;
+    }
+    #headerLogo {
+        margin-left: 20px;
+        margin-right: 20px;
+    }
+    #spacer {
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      height: auto;
+      padding: 10px 0;
+      padding-right: 15px;
+      width: 50%;
+    }
+  
+    #overallShare {
+      width: 100%;
+    }
+  
+    #shareLinkAndButton {
+      flex-direction: row;
+      width: 100%;
+      height: 30px;
+    }
+  
+    #copyLink {
+      font-size: 13px;
+      width: 75%;
+      padding-left: 10px;
+    }
+  
+    #copyButton {
+      width: 25%;
+      padding: 0px;
+      height: 30px;
+      overflow: hidden;
+    }
+  
+    #downloadContainer {
+      margin: 0;
+      width: 100%;
+      display: flex;
+      justify-content: flex-end;
+    }
+  
+    #downloadBtn {
+      width: 50%;
+      height: 30px;
+      font-size: 0px;
+      padding: 10px;
+      overflow: hidden;
+    }
+  
+    #headerLogo {
+      padding-left: 10px;
+      width: 70px;
+    }
+  
+    #toolTip {
+      display: none; /* optional: hide tooltip on mobile */
+    }
+  }
+  
