@@ -7,7 +7,7 @@ body {
   width: 100vw; /* Ensures full width */
   height: 100vh; /* custom full height, controls scrolling area */
   box-sizing: border-box;
-  background-color: #aacae6;
+  background-color: #0a063c;
 }
 
 /* General container styling */
