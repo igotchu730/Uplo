@@ -1,62 +1,191 @@
-/* Ensure Full Page Usage */
-html, body {
-  height: 100%;
+/* Reset body margins and padding */
+body {
   margin: 0;
   padding: 0;
-  display: flex;
-  flex-direction: column;
   font-family: 'Open Sans', sans-serif;
+  overflow: hidden; /* hide overflows */
+  width: 100vw; /* Ensures full width */
+  height: 100vh; /* custom full height, controls scrolling area */
+  box-sizing: border-box;
+  background-color: #0a063c;
 }
 
-/* Main Content Section */
-#main-body {
-  display: flex;
-  justify-content: center;
-  align-items: stretch;
-  width: 100%;
-  height: 100%;
-}
-
-/* White Container for Terms Content */
-#terms-content {
-  background-color: white;
-  width: 75%;
-  height: auto; /* Let content define height */
-  padding: 40px;
-  overflow-y: auto; /* Allows scrolling inside */
-  margin-bottom: 95px; /* Prevents footer from blocking the last item */  
+/* General container styling */
+.container {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%; /* Ensure containers stay within viewport */
+  height: 100%;
+  overflow-y: auto; /* overflow for container, auto scrolling */
+  overflow-x: hidden;
 }
 
-/* Footer Styling */
-#footer {
+/* Header styling */
+#header {
+  background-color: #0a063c;    /*To change the top container background color, original color was #00002A;*/
+  height: 85px;
   width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  z-index: 1000; /* keeps the header on top */
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+/* logo styling */
+#headerLogo{
+  width: 90px;
+  height:auto;
+  padding-left: 20px;
+}
+
+/* Footer styling */
+#footer {
+  background-color: #0a063c; /* background */
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between; 
+  align-items: center; 
+  z-index: 1000; /* bring to front */
   position: fixed;
   bottom: 0;
   left: 0;
 }
 
-/* Alternating Section Colors */
-.section {
-  padding: 20px;
-  border-radius: 10px;
-  margin: 10px 0;
+#footer-content {
+  background-color: #0a063c;    /*To change the footer container background color, original color was #00002A;*/
+  width: 100%;
+  gap: 20px;
+  padding-left: 20px;
+  padding-top: 20px;
+  display: flex;
+  justify-content: flex-start; /* Align footer links to the left */
+  align-items: center;
 }
 
-.white {
+#copyright{
+  background-color:#0a063c; /*To change the copyright container background color, original color was #00002A;*/
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; 
+  align-items: flex-start;
+  padding-bottom: 10px;
+}
+
+.footer-link {
+  font-weight: bold;
+  text-decoration: underline;
+  color: rgb(206, 200, 200) ; /* Navy color */
+  transition: color 0.3s ease;
+}
+.footer-link:hover {
+    color: #FA8072;  
+}
+/*Copyright Infrigement*/
+#footer p {
+  font-size: 0.8em;
+  color: white; /* Navy color */
+  padding-left: 20px;
+  opacity: 0.7;
+}
+
+.github-logo {
+  position: relative;
+  width: 40px;
+  height: auto;
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+  right: 20px;
+}
+
+.github-logo:hover {
+  opacity: 1;
+}
+
+#footer-half{
+  display: flex;
+  flex-direction: column;
+}
+
+/* Main body styling */
+#main-body {
+  background-color: #aacae6;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+#terms-content{
   background-color: white;
+  height: 100%;
+  width: 50%;
+  padding: 100px;
+  overflow-y: auto;
+  margin-top: 50px;
+  margin-bottom: 80px;
 }
 
-.grey {
-  background-color: #F7F7F7; /* Light grey alternating sections */
+#terms-content h1{
+  font-size: 2.5em;
+}
+
+#terms-content p{
+  font-size: 1.5em;
 }
 
 
 
 @media(max-width:525px){
-  #terms-content {
-    margin-bottom: 225px; /* Prevents footer from blocking the last item */
-    width: 100%;
+  #footer-content {
+    padding-left: 20px;
+    padding-top: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: start;
   }
+  #copyright{
+    margin-top: 20px;
+  }
+  .github-logo {
+    margin-top: 175px;
+  }
+  #upload {
+    width: 250px; 
+    height: 250px; 
+  }
+  #upload-text {
+    font-size: 1em;
+  }
+  #custom-plus {
+    position: relative;
+    width: 75px; /* Width of the "+" symbol*/
+    height: 75px; /* Height of the "+" symbol*/
+  }
+  #header {
+    height: 80px;
+  }
+  #terms-content{
+    width: 80%;
+    padding: 50px;
+    overflow-y: auto;
+    margin-top: 50px;
+    margin-bottom: 225px;
+  }
+  #terms-content h1{
+    font-size: 2em;
+  }
+  #terms-content p{
+    font-size: 1em;
+  }
+  
 }
