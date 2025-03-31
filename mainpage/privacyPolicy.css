@@ -196,7 +196,7 @@ body {
     overflow-y: auto;
     margin-top: 50px;
     margin-bottom: 225px;
-    padding: 0px 100px 100px 100px;
+    padding: 0px 100px 0px 100px;
   }
   #terms-content h1{
     font-size: 2em;
