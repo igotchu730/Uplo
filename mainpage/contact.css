@@ -205,5 +205,7 @@ body {
   #terms-content p{
     font-size: 1em;
   }
-  
+  .container {
+    overflow-y: hidden;
+  }
 }

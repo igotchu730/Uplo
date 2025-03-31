@@ -152,7 +152,6 @@ body {
     flex-direction: column;
     justify-content: flex-start;
     align-items: start;
-    height: 150px;
   }
   #copyright{
     margin-top: 20px;
@@ -181,6 +180,7 @@ body {
     overflow-y: auto;
     margin-top: 50px;
     margin-bottom: 225px;
+    padding-bottom: 150px;
   }
   #terms-content h1{
     font-size: 2em;
