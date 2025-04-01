@@ -6,6 +6,7 @@ body {
   overflow: hidden; /* hide overflows */
   width: 100vw; /* Ensures full width */
   height: 100vh; /* custom full height, controls scrolling area */
+  height: 100dvh;
   box-sizing: border-box;
   background-color: #0a063c;
 }
