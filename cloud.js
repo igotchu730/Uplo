@@ -331,11 +331,12 @@ async function deleteExpiredFiles(){
     };
 };
 
-// automatically delete expired files every given time
-cron.schedule('*/10 * * * *', () => { // every 10 minutes
-    console.log("Running cleanup job...");
+// automatically delete expired files every hour
+cron.schedule('0 * * * *', () => {
+    console.log("Running hourly cleanup job...");
     deleteExpiredFiles();
 });
+
 
 
 // export objects and functions
