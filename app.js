@@ -41,7 +41,7 @@ const {
 
 const PORT = process.env.PORT;
 const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
-const genericImg = `${baseUrl}/assets/testImg.png`;
+const genericImg = `${baseUrl}/assets/UploLogoBG.png`;
 
 // listen for overallProgress events and use socket to emit progress to connected clients
 // basically redirecting the progress to the front end
