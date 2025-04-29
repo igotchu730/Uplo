@@ -1,8 +1,12 @@
 # Uplo FileShare Web App
 
-A lightweight, temporary file-sharing application that allows users to upload files, generate temporary links, and share them effortlessly. Files are stored in AWS S3 and automatically deleted after a set period, ensuring privacy and reducing clutter. 
+Check out our website!<br>
+<a>https://uplo.up.railway.app/</a>
+<br><br>
 
-"Like snapchat for files!"
+A lightweight, temporary file-sharing application that allows users to upload files, generate temporary links, and share them effortlessly. Files are stored in AWS S3 and automatically deleted after a set period, ensuring privacy and reducing clutter. "Its like snapchat for files!"
+
+**Bypass file size limits on messaging apps and embed your photos and videos.** 
 
 <br>
 <p align="center">
