@@ -6,7 +6,7 @@ Check out our website!<br>
 
 A lightweight, temporary file-sharing application that allows users to upload files, generate temporary links, and share them effortlessly. Files are stored in AWS S3 and automatically deleted after a set period, ensuring privacy and reducing clutter. "Its like snapchat for files!"
 
-**Bypass file size limits on messaging apps and embed your photos and videos.** 
+**Bypass file size limits on messaging apps and embed your photos and videos. (Note: As of now, only videos less than 100mb will embed in Discord)** 
 
 <br>
 <p align="center">
