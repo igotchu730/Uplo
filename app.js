@@ -207,6 +207,7 @@ app.post('/upload', upload.array('files'), async (req,res) => {
                     const readStream = fs.createReadStream(filePath);
                     // upload file to s3 using normal upload
                     await uploadFile(readStream, title, fileType);
+                    console.log(fileType)
                     // insert upload info into MYSQL Database
                     insertFileUpload(id,userIp,title,pageLink,downloadLink,file.size);
                 } // if file size is over set size limit
@@ -216,6 +217,7 @@ app.post('/upload', upload.array('files'), async (req,res) => {
                     const readStream = trackReadProgress(filePath);
                     // upload file to s3 using multipart upload
                     await uploadFileMultiPart(readStream, title, fileType);
+                    console.log(fileType)
                     // insert upload info into MYSQL Database
                     insertFileUpload(id,userIp,title,pageLink,downloadLink,file.size);
                 }
@@ -588,8 +590,8 @@ router.get('/file/:uniqueId', async (req,res) => {
             </html>
         `);
     } catch(error){ //error handling
-        console.error('Error retrieving data:', error);
-        res.status(500).send(`Error retrieving file information: ${error.message}`);
+        //console.error('Error retrieving data:', error);
+        return res.sendFile(path.join(__dirname, 'mainpage', 'error.html'));
     }
 });
 
@@ -612,7 +614,8 @@ app.get("/video/:key", async (req, res) => {
             const stream = s3.getObject(streamParams).createReadStream();
             res.writeHead(200, {
                 "Content-Length": fileSize,
-                "Content-Type": "video/mp4",
+                //"Content-Type": "video/mp4",
+                "Content-Type": headObject.ContentType || "application/octet-stream",
             });
             return stream.pipe(res);
         }
@@ -636,7 +639,8 @@ app.get("/video/:key", async (req, res) => {
             "Content-Range": `bytes ${start}-${end}/${fileSize}`,
             "Accept-Ranges": "bytes",
             "Content-Length": end - start + 1,
-            "Content-Type": "video/mp4",
+            //"Content-Type": "video/mp4",
+            "Content-Type": headObject.ContentType || "application/octet-stream",
         });
         stream.pipe(res);
     } catch (error) {

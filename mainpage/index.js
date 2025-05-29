@@ -120,6 +120,9 @@ document.addEventListener("DOMContentLoaded", function() {
             alert('No files selected.');
         }
     })
+    // Enable drag-and-drop
+    enableDragAndDrop(uploadBox);
+    enableDragAndDrop(stagingBox);
 });
 
 
@@ -331,4 +334,33 @@ socket.on('overallProgress', (progress) => {
         loadPercent.textContent = `${progress}%`;
     }
 });
+
+// Enable drag-and-drop on the upload box
+function enableDragAndDrop(targetElement) {
+    targetElement.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        targetElement.classList.add('drag-over');
+    });
+
+    targetElement.addEventListener('dragleave', () => {
+        targetElement.classList.remove('drag-over');
+    });
+
+    targetElement.addEventListener('drop', (e) => {
+        e.preventDefault();
+        targetElement.classList.remove('drag-over');
+
+        const droppedFiles = Array.from(e.dataTransfer.files);
+        droppedFiles.forEach(file => {
+            if (!fileList.some(f => f.name === file.name && f.size === file.size)) {
+                fileList.push(file);
+            }
+        });
+
+        updateFileInput(); // Refresh UI
+        uploadBox.style.display = 'none';
+        stagingBox.style.display = 'flex';
+    });
+}
+
 
