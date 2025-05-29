@@ -261,18 +261,26 @@ const trackUploadProgress = (uploadedBytes, totalBytes) => {
     // calulate percent progress
     uploadProgress = ((uploadedBytes/totalBytes)*100).toFixed(2);
     // emit uploadProgress
-    progressEmitter.emit('uploadProgress',uploadProgress);
+    //progressEmitter.emit('uploadProgress',uploadProgress);
     // update overall progress
     updateOverallProgress();
 };
 
-// calculates overall progress by taking the average of readProgress and uploadProgress
+/*// calculates overall progress by taking the average of readProgress and uploadProgress
 const updateOverallProgress = () => {
     const overallProgress = ((parseFloat(readProgress) + parseFloat(uploadProgress)) / 2).toFixed(2); //calculate
     console.log(`Overall Progress: ${overallProgress}%`); // log progress
     // update overall progress
     progressEmitter.emit('overallProgress', overallProgress);
+};*/
+const updateOverallProgress = () => {
+    const overall = (
+        0.4 * parseFloat(readProgress) +
+        0.6 * parseFloat(uploadProgress)
+    ).toFixed(2);
+    progressEmitter.emit('overallProgress', overall);
 };
+
 
 
 // function to delete file directly from S3

@@ -5,7 +5,13 @@ const addMoreButton = document.getElementById('addMoreButton'); // button to add
 const resetButton = document.getElementById('resetButton'); // button to reset file upload
 const loadingBox = document.getElementById('loadingBox'); // box for loading progress
 const loadPercent = document.getElementById('loadPercent'); // loading progress percentage
+const loadLabel = document.getElementById('loadLabel'); // label for loading percent
 const submitButton = document.getElementById('submitButton'); // button for form submission
+
+let simulate;
+let fakeActive = false;
+let fakeDone = false;
+
 
 //FOR TESTING: REMOVE LATER
 const logFiles = () => {
@@ -25,6 +31,7 @@ window.addEventListener('pageshow', function(event) {
 
 // When the page is loaded...
 document.addEventListener("DOMContentLoaded", function() {
+
     stagingBox.style.display = 'none'; // Hide the staging box
     // The upload box when clicked will open the file explorer.
     uploadBox.addEventListener("click", function() {
@@ -43,18 +50,78 @@ document.addEventListener("DOMContentLoaded", function() {
         loadingBox.style.display = 'none';
     })
     // The submit button when clicked will start the progress loading.
-    submitButton.addEventListener('click', function(){
+    submitButton.addEventListener('click', async function(){
+
+        // Check IP limit first
+        const response = await fetch('/check-ip-limit');
+        const data = await response.json();
+        if (data.count >= 3) {
+            alert('Daily limit of 3 uploads reached.');
+            return;
+        }
+
+        loadPercent.style.fontSize = '18px';
+        loadLabel.style.fontSize = '10px';
+        loadLabel.textContent = 'Please Wait. This may take a while.';
         // check if at least one file is selected and is under 2.00GB
         if(totalFileSizeInBytes(fileList) < (2 * (1024 ** 3)) && totalFileSizeInBytes(fileList) > 0){
             uploadBox.style.display = 'none';
             stagingBox.style.display = 'none';
             loadingBox.style.display = 'flex';
+
+            const sizeInBytes = totalFileSizeInBytes(fileList);
+            const sizeInGB = sizeInBytes / (1024 ** 3);
+
+            //skipping fake load if small file
+            const skipFakeThreshold = 500 * 1024 * 1024; // 500MB
+            const isSmallFile = sizeInBytes < skipFakeThreshold;
+            if (isSmallFile) {
+                fakeActive = false;
+                fakeDone = true;
+                loadPercent.style.fontSize = '24px';
+                loadLabel.style.fontSize = '12px';
+                loadLabel.textContent = 'Uploading files';
+                loadPercent.textContent = `0%`;
+                return;
+            }
+
+
+            // Duration = 60 seconds per GB, capped between 1s and 120s
+            const fakeDuration = Math.min(Math.max(sizeInGB * 90000, 1000), 180000);
+            const fakeSteps = 100;
+            const stepTime = fakeDuration / fakeSteps;
+
+            fakeProgress = 0;
+            fakeActive = true; //Flag to track fake progress state
+
+            fakeDone = false;
+
+            let simulate = setInterval(() => {
+                if (!fakeActive) {
+                    clearInterval(simulate); //Exit early if real progress starts
+                    return;
+                }
+
+                if (fakeProgress < fakeSteps) {
+                    fakeProgress += 1;
+                    const displayPercent = (fakeProgress * (100 / fakeSteps)).toFixed(0);
+                    loadPercent.textContent = `Loading: ${displayPercent}%`;
+                } else {
+                    clearInterval(simulate);
+
+                    fakeDone = true;
+                }
+            }, stepTime);
+
+
+
         }else{ // prevent upload
             event.preventDefault();
             alert('No files selected.');
         }
     })
 });
+
 
 // After the user selects file(s), the upload box will disappear and the staging box will appear.
 fileInput.addEventListener('change',(event) => {
@@ -99,7 +166,7 @@ fileInput.addEventListener('change',function(){ //listen for changes in file inp
         // Copy file list to a another array
         fileListPrev = [...fileList];
         // Log
-        console.log('Upload size is within 2.00 GB limit.')
+        //console.log('Upload size is within 2.00 GB limit.')
     } else{ // if file upload size is greater than 2 GB
 
         // Log and alert user
@@ -168,12 +235,7 @@ fileInput.addEventListener('change',function(){ //listen for changes in file inp
     const uploadSize = document.getElementById('fileSize');
     uploadSize.textContent = `${totalFileSize(fileList)} / 2 GB`;
 
-    //FOR TESTING: REMOVE LATER
-    //logFiles();
-    console.log(totalUploadSize);
-    console.log(totalUploadSizeGB + ' GB');
-    console.log(`Bytes: ${totalFileSizeInBytes(fileList)}`);
-    //FOR TESTING: REMOVE LATER
+
 })
 
 
@@ -248,6 +310,25 @@ function totalFileSizeInGB(files){
 // listen for socket event overallProgress, update load percent
 const socket = io();
 socket.on('overallProgress', (progress) => {
-    loadPercent.textContent = `${progress}%`;
+    if (fakeActive && !fakeDone) {
+        fakeActive = false;
+        clearInterval(simulate);
+        loadPercent.textContent = 'Loading: 100%';
+        fakeDone = true;
+
+        // Hold 100% for half a second before showing real progress
+        setTimeout(() => {
+            loadPercent.style.fontSize = '24px';
+            loadLabel.style.fontSize = '12px';
+            loadLabel.textContent = 'Uploading files';
+            loadPercent.textContent = `${progress}%`;
+        }, 500);
+    } else {
+        // If fake is already done or not active, update immediately
+        loadPercent.style.fontSize = '24px';
+        loadLabel.style.fontSize = '12px';
+        loadLabel.textContent = 'Uploading files';
+        loadPercent.textContent = `${progress}%`;
+    }
 });
 

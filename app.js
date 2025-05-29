@@ -42,12 +42,23 @@ const {
 const PORT = process.env.PORT;
 const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
 const genericImg = `${baseUrl}/assets/UploLogoBG.png`;
+const genericImg2 = `${baseUrl}/assets/UploIcon.png`;
 
 // listen for overallProgress events and use socket to emit progress to connected clients
 // basically redirecting the progress to the front end
 progressEmitter.on('overallProgress', (progress) => {
     io.emit('overallProgress', progress);
 });
+
+
+progressEmitter.on('uploadProgress', (progress) => {
+    io.emit('uploadProgress', progress);
+});
+
+progressEmitter.on('readProgress', (progress) => {
+    io.emit('readProgress', progress);
+});
+
 
 // allow for reverse proxy
 app.set('trust proxy', true);
@@ -364,22 +375,42 @@ router.post('/initiate-multipart-upload', async (req,res) =>{
         // Array to contain presigned url for each part upload
         const presignedUrls = [];
 
-        // loop through all parts of the upload and generate presigned urls
+        /*// loop through all parts of the upload and generate presigned urls
         for (let partNumber = 1; partNumber <= partCount; partNumber++) {
-    try {
-        const url = await s3.getSignedUrlPromise('uploadPart', {
-            Bucket: process.env.S3_BUCKET_NAME,
-            Key: fileName,
-            UploadId,
-            PartNumber: partNumber,
-        });
-        presignedUrls.push(url);
-        console.log(`Generated presigned URL for part ${partNumber}`);
-    } catch (err) {
-        console.error(`Error generating presigned URL for part ${partNumber}:`, err);
-        console.error('AWS Error Response:', err.message);
-    }
-}
+            try {
+                const url = await s3.getSignedUrlPromise('uploadPart', {
+                    Bucket: process.env.S3_BUCKET_NAME,
+                    Key: fileName,
+                    UploadId,
+                    PartNumber: partNumber,
+                });
+                presignedUrls.push(url);
+                console.log(`Generated presigned URL for part ${partNumber}`);
+            } catch (err) {
+                console.error(`Error generating presigned URL for part ${partNumber}:`, err);
+                console.error('AWS Error Response:', err.message);
+            }
+        }*/
+        for (let partNumber = 1; partNumber <= partCount; partNumber++) {
+            try {
+                const url = await s3.getSignedUrlPromise('uploadPart', {
+                    Bucket: process.env.S3_BUCKET_NAME,
+                    Key: fileName,
+                    UploadId,
+                    PartNumber: partNumber,
+                });
+                presignedUrls.push(url);
+
+                // --- Emit intermediate progress ---
+                const percentGenerated = ((partNumber / partCount) * 10).toFixed(2); // up to 10%
+                progressEmitter.emit('overallProgress', percentGenerated);
+
+                console.log(`Generated presigned URL for part ${partNumber}`);
+            } catch (err) {
+                console.error(`Error generating presigned URL for part ${partNumber}:`, err);
+            }
+        }
+
         // response
         res.json({uploadId: UploadId, parts: presignedUrls});
 
@@ -437,6 +468,18 @@ router.get('/file/:uniqueId', async (req,res) => {
         const fileName = decryptData(retrievedfileName);
         let cleanName = fileName.replace(/-(?!.*-).*?\./, '.');
 
+        try {
+            await s3.headObject({
+                Bucket: process.env.S3_BUCKET_NAME,
+                Key: fileName,
+            }).promise();
+        } catch (err) {
+            if (err.code === 'NotFound' || err.statusCode === 404) {
+                //console.warn(`File not found in S3 for id: ${uniqueId}, file: ${fileName}`);
+                return res.sendFile(path.join(__dirname, 'mainpage', 'error.html'));
+            }
+            throw err; // Unexpected AWS error
+        }
 
         // retrieve share link from database using id
         const retrievedShareLink = await retrieveFileUploadData(uniqueId,'page_link');
@@ -506,7 +549,7 @@ router.get('/file/:uniqueId', async (req,res) => {
                 ${ogMediaTags}
 
                 <!-- Favicon & Theme Color -->
-                <link rel="icon" href="${genericImg}" />
+                <link rel="icon" href="${genericImg2}" />
                 <meta name="theme-color" content="#FA8072" />
                 <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
             </head>
@@ -552,28 +595,20 @@ router.get('/file/:uniqueId', async (req,res) => {
 
 // streams videos from s3, allow seekiong
 app.get("/video/:key", async (req, res) => {
+    const { key } = req.params;
+    const range = req.headers.range;
+
+    const headParams = {
+        Bucket: process.env.S3_BUCKET_NAME,
+        Key: key,
+    };
+
     try {
-        // get file name 
-        const { key } = req.params;
-        // get the range header
-        const range = req.headers.range;
-
-        // bucket and file name
-        const headParams = {
-            Bucket: process.env.S3_BUCKET_NAME,
-            Key: key,
-        };
-
-        // get the file metadata to determine size
         const headObject = await s3.headObject(headParams).promise();
         const fileSize = headObject.ContentLength;
 
-        // if range header is not present, serve enitre video
         if (!range) {
-            const streamParams = {
-                Bucket: process.env.S3_BUCKET_NAME,
-                Key: key,
-            };
+            const streamParams = { Bucket: process.env.S3_BUCKET_NAME, Key: key };
             const stream = s3.getObject(streamParams).createReadStream();
             res.writeHead(200, {
                 "Content-Length": fileSize,
@@ -582,15 +617,14 @@ app.get("/video/:key", async (req, res) => {
             return stream.pipe(res);
         }
 
-        // if range header exists, extract bytes from header and convert to int
         const parts = range.replace(/bytes=/, "").split("-");
         const start = parseInt(parts[0], 10);
         const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
-        // invalid range
+
         if (start >= fileSize || end >= fileSize) {
             return res.status(416).send("Requested range not satisfiable");
         }
-        // stream only request portion
+
         const streamParams = {
             Bucket: process.env.S3_BUCKET_NAME,
             Key: key,
@@ -598,7 +632,6 @@ app.get("/video/:key", async (req, res) => {
         };
         const stream = s3.getObject(streamParams).createReadStream();
 
-        // handle range requests, allow partial content delivery
         res.writeHead(206, {
             "Content-Range": `bytes ${start}-${end}/${fileSize}`,
             "Accept-Ranges": "bytes",
@@ -606,12 +639,21 @@ app.get("/video/:key", async (req, res) => {
             "Content-Type": "video/mp4",
         });
         stream.pipe(res);
-
-    // error handling
     } catch (error) {
-        console.error("Error streaming video:", error);
+        if (error.code === 'NotFound' || error.statusCode === 404) {
+            //console.warn(`S3 file not found: ${key}`);
+            return res.sendFile(path.join(__dirname, 'mainpage', 'error.html'));
+        }
+
+        //console.error("Error streaming video:", error);
         res.status(500).send("Error streaming video");
     }
 });
 
+
+app.get('/check-ip-limit', async (req, res) => {
+  const userIp = getClientIp(req);
+  const IPCount = await checkIpCount(userIp);
+  res.json({ count: IPCount });
+});
 
